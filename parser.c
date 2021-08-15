@@ -1,7 +1,5 @@
 #include "tiny.h"
 
-struct Symbol *symbols = NULL;
-
 void parse(struct Token *tokens, struct Variable **vars, struct Label **labels) {
     printf("PARSER STARTED\n");
     program(tokens, vars, labels);
