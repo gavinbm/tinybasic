@@ -1,15 +1,23 @@
 #include "tiny.h"
-// int main(int argc, char **argv) {
-    
-//     FILE *read = fopen(argv[1], "r");
-//     struct Token *tokens = lex(read);
-//     print_tokens(tokens);
-//     free_tokens(tokens);
-//     fclose(read);
-//     return 0;
-// }
+/*          ---- Token Type Map ----
+    Specials        Keywords        Operators
+    EOF     = 1     LABEL    = 6    EQ    = 17
+    NEWLINE = 2     GOTO     = 7    PLUS  = 18
+    NUMBER  = 3     PRINT    = 8    MINUS = 19
+    IDENT   = 4     INPUT    = 9    MUL   = 20
+    STRING  = 5     LET      = 10   DIV   = 21
+                    IF       = 11   EQEQ  = 22
+                    THEN     = 12   NOTEQ = 23
+                    ENDIF    = 13   LT    = 24
+                    WHILE    = 14   LTEQ  = 25
+                    REPEAT   = 15   GT    = 26
+                    ENDWHILE = 16   GTEQ  = 27
+*/
 
-
+/*
+Takes in a file pointer that is assumed to be a Tiny BASIC file. Reads the file character by
+character determing the text and type of each token. Returns a linked list of tokens.
+*/
 struct Token *lex(FILE *read) {
 
     int curr_pos, key;
@@ -179,6 +187,10 @@ struct Token *lex(FILE *read) {
     return tokens;
 }
 
+/*
+Takes a double pointer to a linked list of tokens to which we will append a new node with the 
+text of source(the second arg) and a type of type(the third arg).
+*/
 void createToken(struct Token **head, char *source, int type) {
     struct Token **tmp = head, *add;
     int source_len = strlen(source);
@@ -197,20 +209,23 @@ void createToken(struct Token **head, char *source, int type) {
     *tmp = add;
 }
 
+/*
+Sets up an array of all our possible token types and checks the given string to see if the text matches
+the token type.
+*/
 int iskeyword(char *str) {
-    char keywords[16][8] = {
+    char keywords[27][9] = {
         "EOF", "NEWLINE", "NUMBER",
         "IDENT", "STRING", "LABEL",
         "GOTO", "PRINT", "INPUT",
         "LET", "IF", "THEN",
         "ENDIF", "WHILE", "REPEAT",
-        "ENDWHILE"}; 
-        // "EQ", "PLUS",
-        // "MINUS", "MUL", "DIV",
-        // "EQEQ", "NOTEQ", "LT",
-        // "LTEQ", "GT", "GTEQ"};
+        "ENDWHILE", "EQ", "PLUS",
+        "MINUS", "MUL", "DIV",
+        "EQEQ", "NOTEQ", "LT",
+        "LTEQ", "GT", "GTEQ"};
     
-    for(int i = 0; i < 16; ++i) {
+    for(int i = 0; i < 27; ++i) {
         if(strcmp(str, keywords[i]) == 0)
             return i + 1;
     }
