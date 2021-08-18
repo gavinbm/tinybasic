@@ -9,7 +9,7 @@ school isn't offering it so I'm putting on my big boy pants and teaching myself 
 - [ ] Complete the emitter
 - [ ] Complete testing suite with sample programs
 - [ ] Write the REPL
-- [ ] Get it added to Raspbian as an "educational" tool
+- [ ] Get it added to Raspbian as an "educational" tool (no idea if this is even possible)
 
 # The Grammar and Features
 Here is the current grammar, I may change this later to make it more feature rich or to just be stylistically different (i.e. reading files, only goto statements for looping to make it more assembly-esqe, etc.). As of right now it's just the grammar from Dr. Henley's article. I'd also like to write a REPL for this so it behaves a bit more like some BASICs or FORTHs but I'm getting a bit ahead of myself with that.
