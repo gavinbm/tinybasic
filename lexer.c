@@ -117,7 +117,7 @@ struct Token *lex(FILE *read) {
                         i++;
                     } else {
                         substr = malloc(2 * sizeof(char));
-                        substr[0] = '=';
+                        substr[0] = '>';
                         substr[1] = '\0';
                         createToken(&tokens, substr, 26);
                         free(substr);
