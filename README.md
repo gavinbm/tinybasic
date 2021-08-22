@@ -3,6 +3,13 @@ A (poorly executed) C implementation of the Tiny BASIC compiler found in [this a
 and in [this github repo](https://github.com/AZHenley/teenytinycompiler). I did pretty well in Automata last semester and was excited to take Compiler Design this Fall, but my
 school isn't offering it so I'm putting on my big boy pants and teaching myself how to write a compiler (with no memory leaks to boot!). The final goal is to compile to arm32 executables that can be run on a raspberry pi.
 
+# How to Use
+1) clone the repo via git clone
+2) run make
+3) write some teeny tiny basic into a .bas file
+4) then to compile into C run "./tiny {path to basic file} {name of c file to produce}
+5) compile the C file and enjoy
+
 # Todo List and Milestones
 - [x] Complete the lexer
 - [x] Complete the parser
