@@ -27,10 +27,6 @@ void program(struct Token *tokens) {
     
     struct Token *tmp_tok = tokens;
 
-    init_code(final_code, "#include<stdio.h>\n");
-    printf("here\n");
-    printf("%s\n", *final_code);
-
     while(tmp_tok->type == 2)
         tmp_tok = tmp_tok->next;
 
@@ -347,7 +343,7 @@ void createvar(struct Variable **vars, char *name, int value) {
     int name_len = strlen(name);
 
     add = malloc(sizeof(struct Variable));
-    add->name = malloc(name_len * sizeof(char));
+    add->name = malloc(name_len + 1 * sizeof(char));
     strcpy(add->name, name);
     add->value = value;
     add->next = NULL;
