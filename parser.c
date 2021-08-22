@@ -28,7 +28,6 @@ void program(struct Token *tokens) {
     struct Token *tmp_tok = tokens;
     final_code = malloc(37 * sizeof(char));
     strcpy(final_code, "#include <stdio.h>\nint main(void) {\n");
-    printf("[%s]\n", final_code);
 
     while(tmp_tok->type == 2)
         tmp_tok = tmp_tok->next;
@@ -68,42 +67,44 @@ struct Token *statement(struct Token *tokens) {
             curr_tok = curr_tok->next;
         }
         else {
-            tmp_code = malloc(9 * sizeof(char));
-            strcpy(tmp_code, "printf(\"");
-            final_code = append_line(final_code, tmp_code);
+            final_code = append_line(final_code, "printf(\"%.2f\\n\", (float)(");
             curr_tok = expression(curr_tok);
-            final_code = append_line(final_code, "\\n\");\n");
-            free(tmp_code);
+            final_code = append_line(final_code, "));\n");
         }
     }
     // IF comparison THEN nl {statement} ENDIF nl
     else if(strcmp("IF", curr_tok->text) == 0) {
         //printf("STATEMENT -- IF\n");
         curr_tok = curr_tok->next;
+        final_code = append_line(final_code, "if(");
         curr_tok = comparison(curr_tok);
 
         curr_tok = match(curr_tok, 12);
         curr_tok = nl(curr_tok);
 
+        final_code = append_line(final_code, ") {\n");
         while(curr_tok->type != 13)
             curr_tok = statement(curr_tok);
         
         curr_tok = match(curr_tok, 13);
+        final_code = append_line(final_code, "\n}\n");
     }
     // WHILE comparison REPEAT {statement} nl ENDWHILE
     else if(strcmp("WHILE", curr_tok->text) == 0) {
         //printf("STATEMENT -- WHILE\n");
         curr_tok = curr_tok->next;
-        
+        final_code = append_line(final_code, "while(");
         curr_tok = comparison(curr_tok);
 
         curr_tok = match(curr_tok, 15);
         curr_tok = nl(curr_tok);
 
+        final_code = append_line(final_code, ") {\n");
         while(curr_tok->type != 16)
             curr_tok = statement(curr_tok);
         
         curr_tok = match(curr_tok, 16);
+        final_code = append_line(final_code, "\n}\n");
     }
     // extra condition for ENDWHILE to conclude WHILE statement
     else if(strcmp("ENDWHILE", curr_tok->text) == 0) {
@@ -120,7 +121,8 @@ struct Token *statement(struct Token *tokens) {
             exit(4);
         }
         createlabel(labels, curr_tok->text);
-
+        final_code = append_line(final_code, curr_tok->text);
+        final_code = append_line(final_code, ":\n");
         curr_tok = match(curr_tok, 4);
     }
     // GOTO ident nl
@@ -134,7 +136,9 @@ struct Token *statement(struct Token *tokens) {
             printf("GOTO ERROR: label [%s] does not exist...\n", curr_tok->text);
             exit(5); 
         }
-
+        final_code = append_line(final_code, "goto ");
+        final_code = append_line(final_code, curr_tok->text);
+        final_code = append_line(final_code, ";\n");
         curr_tok = match(curr_tok, 4);
     }
     // LET ident = {expression} nl
@@ -142,12 +146,20 @@ struct Token *statement(struct Token *tokens) {
         //printf("STATEMENT -- LET\n");
         curr_tok = curr_tok->next;
 
-        if(isvariable(var_head, curr_tok->text) == 0) 
+        if(isvariable(var_head, curr_tok->text) == 0) {
             createvar(vars, curr_tok->text, atoi(curr_tok->next->text));
-        
+            final_code = append_line(final_code, "float ");
+            final_code = append_line(final_code, curr_tok->text);
+            final_code = append_line(final_code, ";\n");
+        }
+        final_code = append_line(final_code, curr_tok->text);
+        final_code = append_line(final_code, " = ");
+
         curr_tok = match(curr_tok, 4);
         curr_tok = match(curr_tok, 17);
         curr_tok = expression(curr_tok);
+
+        final_code = append_line(final_code, ";\n");
     }
     // INPUT ident nl
     else if(strcmp("INPUT", curr_tok->text) == 0) {
@@ -156,7 +168,18 @@ struct Token *statement(struct Token *tokens) {
         
         if(isvariable(var_head, curr_tok->text) == 0) {
             createvar(vars, curr_tok->text, atoi(curr_tok->next->text));
+            final_code = append_line(final_code, "float ");
+            final_code = append_line(final_code, curr_tok->text);
+            final_code = append_line(final_code, ";\n");
         }
+
+        final_code = append_line(final_code, "if(scanf(\"%f\", ");
+        final_code = append_line(final_code, "&");
+        final_code = append_line(final_code, curr_tok->text);
+        final_code = append_line(final_code, ") == 0) {\n");
+        final_code = append_line(final_code, curr_tok->text);
+        final_code = append_line(final_code, " = 0;\n");
+        final_code = append_line(final_code, "scanf(\"%*s\");\n}\n");
     
         curr_tok = match(curr_tok, 4);
     }
@@ -177,6 +200,7 @@ struct Token *comparison(struct Token *curr_token) {
     curr_token = expression(curr_token);
 
     if(iscomparisonop(curr_token)) {
+        final_code = append_line(final_code, curr_token->text);
         curr_token = curr_token->next;
         curr_token = expression(curr_token);
     } else {
@@ -185,6 +209,7 @@ struct Token *comparison(struct Token *curr_token) {
     }
 
     while(iscomparisonop(curr_token)) {
+        final_code = append_line(final_code, curr_token->text);
         curr_token = curr_token->next;
         curr_token = expression(curr_token);
     }
@@ -199,6 +224,7 @@ struct Token *expression(struct Token *curr_token) {
     curr_token = term(curr_token);
 
     while(curr_token->type == 18 || curr_token->type == 19) {
+        final_code = append_line(final_code, curr_token->text);
         curr_token = term(curr_token->next);
     }
    
@@ -210,8 +236,9 @@ struct Token *term(struct Token *curr_token) {
     //printf("TERM\n");
    
     curr_token = unary(curr_token);
-    printf("[%d]\n", curr_token->type);
+
     while(curr_token->type == 20 || curr_token->type == 21) {
+        final_code = append_line(final_code, curr_token->text);
         curr_token = unary(curr_token->next);
     }
     return curr_token;
@@ -221,11 +248,13 @@ struct Token *term(struct Token *curr_token) {
 struct Token *unary(struct Token *curr_token) {
     //printf("UNARY\n");
 
-    if(curr_token->type == 18 || curr_token->type == 19)
+    if(curr_token->type == 18 || curr_token->type == 19) {
+        final_code = append_line(final_code, curr_token->text);
         curr_token = curr_token->next;
+    }
   
     curr_token = primary(curr_token);
-   
+
     return curr_token;
 }
 
@@ -235,6 +264,7 @@ struct Token *primary(struct Token *curr_token) {
 
     switch(curr_token->type) {
         case 3:
+            final_code = append_line(final_code, curr_token->text);
             curr_token = curr_token->next;
             break;
         case 4:
@@ -242,6 +272,7 @@ struct Token *primary(struct Token *curr_token) {
                 printf("PRIMARY ERROR: variable [%s] does not exist...\n", curr_token->text);
                 exit(5);
             }
+            final_code = append_line(final_code, curr_token->text);
             curr_token = curr_token->next;
             break;
         default:
@@ -259,9 +290,11 @@ struct Token *nl(struct Token *curr_token) {
     
     if(curr_token != NULL) {
         curr_token = match(curr_token, 2);
-
-        while(curr_token->type == 2) {
-            curr_token = curr_token->next;
+        
+        if(curr_token != NULL) {
+            while(curr_token->type == 2) {
+                curr_token = curr_token->next;
+            }
         }
     }
 

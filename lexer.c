@@ -50,21 +50,21 @@ struct Token *lex(FILE *read) {
                     substr = malloc(2 * sizeof(char));
                     substr[0] = '-';
                     substr[1] = '\0';
-                    createToken(&tokens, &curr_char, 19);
+                    createToken(&tokens, substr, 19);
                     free(substr);
                     break;
                 case '*':
                     substr = malloc(2 * sizeof(char));
                     substr[0] = '*';
                     substr[1] = '\0';
-                    createToken(&tokens, &curr_char, 20);
+                    createToken(&tokens, substr, 20);
                     free(substr);
                     break;
                 case '/':
                     substr = malloc(2 * sizeof(char));
                     substr[0] = '/';
                     substr[1] = '\0';
-                    createToken(&tokens, &curr_char, 21);
+                    createToken(&tokens, substr, 21);
                     free(substr);
                     break;
                 /* now we have to check for two character tokens. Check the current
