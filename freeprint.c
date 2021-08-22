@@ -20,13 +20,14 @@ frees all tokens starting from the head reference given, iterates over the list
 freeing each token individually then gives a count at the end;
 */
 void free_tokens(struct Token *head) {
-    struct Token *tmp = head;
+    struct Token *tmp = head, *tmp2;
 
     int i = 0;
     while(tmp != NULL) {
         free(tmp->text);
-        free(tmp);
+        tmp2 = tmp;
         tmp = tmp->next;
+        free(tmp2);
         i++;
     }
     printf("%d tokens free'd...\n", i);

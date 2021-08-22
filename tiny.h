@@ -23,6 +23,10 @@ struct Label {
     struct Label *next;
 };
 
+extern struct Variable *var;
+extern struct Label *label;
+extern char **final_code;
+
 /* ---- lexer.c ---- */
 struct Token *lex(FILE *read);
 void createToken(struct Token **head, char *source, int type);
@@ -31,14 +35,14 @@ void print_tokens(struct Token *head);
 void free_tokens(struct Token *head);
 
 /* ---- parser.c ---- */
-void parse(struct Token *curr_token, struct Variable **vars, struct Label **labels);
-void program(struct Token *curr_token, struct Variable **vars, struct Label **labels);
-struct Token *statement(struct Token *tokens, struct Variable **vars, struct Label **labels);
-struct Token *comparison(struct Token *curr_token, struct Variable *vars);
-struct Token *expression(struct Token *curr_token, struct Variable *vars);
-struct Token *term(struct Token *curr_token, struct Variable *vars);
-struct Token *unary(struct Token *curr_token, struct Variable *vars);
-struct Token *primary(struct Token *curr_token, struct Variable *vars);
+void parse(struct Token *curr_token);
+void program(struct Token *curr_token);
+struct Token *statement(struct Token *tokens);
+struct Token *comparison(struct Token *curr_token);
+struct Token *expression(struct Token *curr_token);
+struct Token *term(struct Token *curr_token);
+struct Token *unary(struct Token *curr_token);
+struct Token *primary(struct Token *curr_token);
 struct Token *nl(struct Token *curr_token);
 struct Token *match(struct Token *token, int type);
 
@@ -51,6 +55,13 @@ void createlabel(struct Label **labels, char *name);
 void createvar(struct Variable **vars, char *name, int value);
 struct Label *getlabel(struct Label *labels, char *name);
 struct Variable *getvar(struct Variable *vars, char *name);
+
+/* ---- emitter.c ---- */
+int write_file(char *filename, char *code);
+void init_code(char **code, const char *initial_value);
+void prepend_line(char *curr_code, const char *new_code);
+char *append_line(char *curr_code, char *new_code);
+void emit(char *curr_code, char *new_code);
 
 /* ---- freeprint.c ----- */
 void print_tokens(struct Token *head);

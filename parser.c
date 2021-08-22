@@ -1,23 +1,41 @@
 #include "tiny.h"
 
-void parse(struct Token *tokens, struct Variable **vars, struct Label **labels) {
-    printf("PARSER STARTED\n");
-    program(tokens, vars, labels);
+/*
+Welcome to the parser, this will walk through our tokens and make sure that each
+line of code (which can be thought of as a list of tokens that begins just after a 
+newline and ends with a newline) is actually part of our grammar. Each function, barring
+some helpers, corresponds to a rule in our grammar and will check that each token is
+where it's supposed to be. If any tokens are found out of place, we print an error message
+and kill the program with an exit() call.
+*/
+
+char **final_code;
+struct Variable *var = NULL;
+struct Label *label = NULL;
+struct Variable **vars = &var;
+struct Label **labels = &label;
+
+// initializes the grammar for us to step through
+void parse(struct Token *tokens) {
+    //printf("PARSER STARTED\n");
+    program(tokens);
 }
 
 // program ::= {statement}
-void program(struct Token *tokens, struct Variable **vars, struct Label **labels) {
-    printf("PROGRAM\n");
+void program(struct Token *tokens) {
+    //printf("PROGRAM\n");
     
     struct Token *tmp_tok = tokens;
-    struct Variable **tmp_vars = vars;
-    struct Label **tmp_labels = labels;
+
+    init_code(final_code, "#include<stdio.h>\n");
+    printf("here\n");
+    printf("%s\n", *final_code);
 
     while(tmp_tok->type == 2)
         tmp_tok = tmp_tok->next;
 
     while(tmp_tok != NULL) {
-        tmp_tok = statement(tmp_tok, tmp_vars, tmp_labels);
+        tmp_tok = statement(tmp_tok);
     }
 }
 
@@ -30,58 +48,58 @@ statement ::= "PRINT" (expression | string) nl
             | "LET" ident "=" expression nl
             | "INPUT" ident nl
 */
-struct Token *statement(struct Token *tokens, struct Variable **vars, struct Label **labels) {
+struct Token *statement(struct Token *tokens) {
     struct Token *curr_tok = tokens;
     struct Variable *var_head = *vars;
     struct Label *label_head = *labels, *label_tmp;
 
     // PRINT expression | string nl
     if(strcmp("PRINT", curr_tok->text) == 0) {
-        printf("STATEMENT -- PRINT\n");
+        //printf("STATEMENT -- PRINT\n");
         curr_tok = curr_tok->next;
         if(isstring(curr_tok))
             curr_tok = curr_tok->next;
         else {
-            curr_tok = expression(curr_tok, var_head);
+            curr_tok = expression(curr_tok);
         }
     }
     // IF comparison THEN nl {statement} ENDIF nl
     else if(strcmp("IF", curr_tok->text) == 0) {
-        printf("STATEMENT -- IF\n");
+        //printf("STATEMENT -- IF\n");
         curr_tok = curr_tok->next;
-        curr_tok = comparison(curr_tok, var_head);
+        curr_tok = comparison(curr_tok);
 
         curr_tok = match(curr_tok, 12);
         curr_tok = nl(curr_tok);
 
         while(curr_tok->type != 13)
-            curr_tok = statement(curr_tok, vars, labels);
+            curr_tok = statement(curr_tok);
         
         curr_tok = match(curr_tok, 13);
     }
     // WHILE comparison REPEAT {statement} nl ENDWHILE
     else if(strcmp("WHILE", curr_tok->text) == 0) {
-        printf("STATEMENT -- WHILE\n");
+        //printf("STATEMENT -- WHILE\n");
         curr_tok = curr_tok->next;
         
-        curr_tok = comparison(curr_tok, var_head);
+        curr_tok = comparison(curr_tok);
 
         curr_tok = match(curr_tok, 15);
         curr_tok = nl(curr_tok);
 
         while(curr_tok->type != 16)
-            curr_tok = statement(curr_tok, vars, labels);
+            curr_tok = statement(curr_tok);
         
         curr_tok = match(curr_tok, 16);
     }
     // extra condition for ENDWHILE to conclude WHILE statement
     else if(strcmp("ENDWHILE", curr_tok->text) == 0) {
-        printf("STATEMENT -- ENDWHILE\n");
+        //printf("STATEMENT -- ENDWHILE\n");
         curr_tok = match(curr_tok, 16);
     }
     // LABEL ident nl
     else if(strcmp("LABEL", curr_tok->text) == 0) {
-        printf("STATEMENT -- LABEL\n");
+        //printf("STATEMENT -- LABEL\n");
         curr_tok = curr_tok->next;
         
         if(islabel(label_head, curr_tok->text)) {
@@ -94,7 +112,7 @@ struct Token *statement(struct Token *tokens, struct Variable **vars, struct Lab
     }
     // GOTO ident nl
     else if(strcmp("GOTO", curr_tok->text) == 0) {
-        printf("STATEMENT -- GOTO\n");
+        //printf("STATEMENT -- GOTO\n");
         curr_tok = curr_tok->next;
 
         if((label_tmp = getlabel(label_head, curr_tok->text)) != NULL) {
@@ -108,7 +126,7 @@ struct Token *statement(struct Token *tokens, struct Variable **vars, struct Lab
     }
     // LET ident = {expression} nl
     else if(strcmp("LET", curr_tok->text) == 0) {
-        printf("STATEMENT -- LET\n");
+        //printf("STATEMENT -- LET\n");
         curr_tok = curr_tok->next;
 
         if(isvariable(var_head, curr_tok->text) == 0) 
@@ -116,11 +134,11 @@ struct Token *statement(struct Token *tokens, struct Variable **vars, struct Lab
         
         curr_tok = match(curr_tok, 4);
         curr_tok = match(curr_tok, 17);
-        curr_tok = expression(curr_tok, var_head);
+        curr_tok = expression(curr_tok);
     }
     // INPUT ident nl
     else if(strcmp("INPUT", curr_tok->text) == 0) {
-        printf("STATEMENT -- INPUT\n");
+        //("STATEMENT -- INPUT\n");
         curr_tok = curr_tok->next;
         
         if(isvariable(var_head, curr_tok->text) == 0) {
@@ -140,14 +158,14 @@ struct Token *statement(struct Token *tokens, struct Variable **vars, struct Lab
 }
 
 // comparison ::= expression (("==" | "!=" | ">" | ">=" | "<" | "<=") expression)+
-struct Token *comparison(struct Token *curr_token, struct Variable *vars) {
-    printf("COMPARISON\n");
+struct Token *comparison(struct Token *curr_token) {
+    //printf("COMPARISON\n");
     
-    curr_token = expression(curr_token, vars);
+    curr_token = expression(curr_token);
 
     if(iscomparisonop(curr_token)) {
         curr_token = curr_token->next;
-        curr_token = expression(curr_token, vars);
+        curr_token = expression(curr_token);
     } else {
         printf("COMPARISON ERROR...\n");
         exit(1);
@@ -155,59 +173,59 @@ struct Token *comparison(struct Token *curr_token, struct Variable *vars) {
 
     while(iscomparisonop(curr_token)) {
         curr_token = curr_token->next;
-        curr_token = expression(curr_token, vars);
+        curr_token = expression(curr_token);
     }
 
     return curr_token;
 }
 
 // expression ::= term {( "-" | "+" ) term}
-struct Token *expression(struct Token *curr_token, struct Variable *vars) {
-    printf("EXPRESSION -- [%s]\n", curr_token->text);
+struct Token *expression(struct Token *curr_token) {
+    //printf("EXPRESSION -- [%s]\n", curr_token->text);
     
-    curr_token = term(curr_token, vars);
+    curr_token = term(curr_token);
 
     while(curr_token->type == 18 || curr_token->type == 19) {
-        curr_token = term(curr_token->next, vars);
+        curr_token = term(curr_token->next);
     }
    
     return curr_token;
 }
 
 // term ::= unary {( "/" | "*" ) unary}
-struct Token *term(struct Token *curr_token, struct Variable *vars) {
-    printf("TERM\n");
+struct Token *term(struct Token *curr_token) {
+    //printf("TERM\n");
 
-    curr_token = unary(curr_token, vars);
+    curr_token = unary(curr_token);
 
     while(curr_token->type == 20 || curr_token->type == 21) {
-        curr_token = unary(curr_token->next, vars);
+        curr_token = unary(curr_token->next);
     }
     return curr_token;
 }
 
 // unary ::= ["+" | "-"] primary
-struct Token *unary(struct Token *curr_token, struct Variable *vars) {
-    printf("UNARY\n");
+struct Token *unary(struct Token *curr_token) {
+    //printf("UNARY\n");
 
     if(curr_token->type == 18 || curr_token->type == 19)
         curr_token = curr_token->next;
     
-    curr_token = primary(curr_token, vars);
+    curr_token = primary(curr_token);
    
     return curr_token;
 }
 
 // primary ::= number | ident
-struct Token *primary(struct Token *curr_token, struct Variable *vars) {
-    printf("PRIMARY -- [%s]\n", curr_token->text);
+struct Token *primary(struct Token *curr_token) {
+    //printf("PRIMARY -- [%s]\n", curr_token->text);
 
     switch(curr_token->type) {
         case 3:
             curr_token = curr_token->next;
             break;
         case 4:
-            if(isvariable(vars, curr_token->text) == 0) {
+            if(isvariable(*vars, curr_token->text) == 0) {
                 printf("PRIMARY ERROR: variable [%s] does not exist...\n", curr_token->text);
                 exit(5);
             }
@@ -224,7 +242,7 @@ struct Token *primary(struct Token *curr_token, struct Variable *vars) {
 
 // nl ::= '\n'+
 struct Token *nl(struct Token *curr_token) {
-    printf("NEWLINE\n");
+    //printf("NEWLINE\n");
     
     if(curr_token != NULL) {
         curr_token = match(curr_token, 2);

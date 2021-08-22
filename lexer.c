@@ -122,8 +122,8 @@ struct Token *lex(FILE *read) {
                         i++; // increase the iterator so we keep moving through the file
                     }
                     // allocate memory for and copy the contents of the string 
-                    substr = malloc((i - curr_pos) * sizeof(char));
-                    memcpy(substr, &buffer[curr_pos], i - curr_pos);
+                    substr = malloc((i - curr_pos + 1) * sizeof(char));
+                    memcpy(substr, &buffer[curr_pos], i - curr_pos + 1);
                     substr[i - curr_pos] = '\0'; // set the null-terminator
                     createToken(&tokens, substr, 5);
                     free(substr);
@@ -144,8 +144,8 @@ struct Token *lex(FILE *read) {
                         while(isalnum(buffer[i])) {
                             i++;
                         }
-                        substr = malloc((i - curr_pos) * sizeof(char));
-                        memcpy(substr, &buffer[curr_pos], i - curr_pos);
+                        substr = malloc((i - curr_pos + 1) * sizeof(char));
+                        memcpy(substr, &buffer[curr_pos], i - curr_pos + 1);
                         substr[i - curr_pos] = '\0'; // set the null-terminator
                         
                         key = iskeyword(substr);
@@ -170,8 +170,8 @@ struct Token *lex(FILE *read) {
                                 }
                                 i++;
                             }
-                            substr = malloc((i - curr_pos) * sizeof(char));
-                            memcpy(substr, &buffer[curr_pos], i - curr_pos);
+                            substr = malloc((i - curr_pos + 1) * sizeof(char));
+                            memcpy(substr, &buffer[curr_pos], i - curr_pos + 1);
                             substr[i - curr_pos] = '\0'; // set the null-terminator
                             createToken(&tokens, substr, 3);
                             free(substr);
@@ -196,7 +196,7 @@ void createToken(struct Token **head, char *source, int type) {
     int source_len = strlen(source);
     
     add = malloc(sizeof(struct Token));
-    add->text = malloc(source_len * sizeof(char));
+    add->text = malloc(source_len + 1 * sizeof(char));
     add->len = source_len;
     add->type = type;
     strcpy(add->text, source);

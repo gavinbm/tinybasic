@@ -2,18 +2,16 @@
 
 int main(int argc, char **argv) {
 
-    FILE *read = fopen(argv[1], "r");
-    struct Token *tokens = lex(read);
-    struct Variable *variables = NULL;
-    struct Label *labels = NULL;
-    
-    parse(tokens, &variables, &labels);
+    FILE *read = fopen(argv[1], "r");   // the Tiny BASIC source code file
+    struct Token *tokens = lex(read);                 // the tokens after lexical analysis
 
-    free_tokens(tokens);
-    free_vars(variables);
-    free_labels(labels);
+    //parse(tokens); // syntax analysis
+ 
+    free_tokens(tokens);                // free the tokens
+    //free_vars(var);               // free the vars
+    //free_labels(label);                // free the labels
 
-    fclose(read);
+    fclose(read);                       // close the basic source file
 
     return 0;
 }
