@@ -6,7 +6,8 @@ school isn't offering it so I'm putting on my big boy pants and teaching myself 
 # Todo List and Milestones
 - [x] Complete the lexer
 - [x] Complete the parser
-- [ ] Complete the emitter
+- [x] Complete the C emitter
+- [ ] Complete the ARM emitter
 - [ ] Complete testing suite with sample programs
 - [ ] Write the REPL
 - [ ] Get it added to Raspbian as an "educational" tool (no idea if this is even possible)
