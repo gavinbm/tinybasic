@@ -39,13 +39,14 @@ and labels respectively.
 */
 
 void free_vars(struct Variable *vars) {
-    struct Variable *tmp = vars;
+    struct Variable *tmp = vars, *tmp2;
     
     int i = 0;
     while(tmp != NULL) {
         free(tmp->name);
-        free(tmp);
+        tmp2 = tmp;
         tmp = tmp->next;
+        free(tmp2);
         i++;
     }
 
@@ -53,13 +54,14 @@ void free_vars(struct Variable *vars) {
 }
 
 void free_labels(struct Label *labels) {
-    struct Label *tmp = labels;
+    struct Label *tmp = labels, *tmp2;
     
     int i = 0;
     while(tmp != NULL) {
         free(tmp->name);
-        free(tmp);
+        tmp2 = tmp;
         tmp = tmp->next;
+        free(tmp2);
         i++;
     }
 
