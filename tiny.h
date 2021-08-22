@@ -23,9 +23,10 @@ struct Label {
     struct Label *next;
 };
 
-extern struct Variable *var;
-extern struct Label *label;
-extern char **final_code;
+/* ---- globals used in tiny.c and emitter.c ---- */
+extern struct Variable *var; // list of variables
+extern struct Label *label;  // list of labels
+extern char *final_code;     // the final code to be emitted
 
 /* ---- lexer.c ---- */
 struct Token *lex(FILE *read);
@@ -58,7 +59,6 @@ struct Variable *getvar(struct Variable *vars, char *name);
 
 /* ---- emitter.c ---- */
 int write_file(char *filename, char *code);
-void init_code(char **code, const char *initial_value);
 void prepend_line(char *curr_code, const char *new_code);
 char *append_line(char *curr_code, char *new_code);
 void emit(char *curr_code, char *new_code);

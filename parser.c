@@ -9,7 +9,7 @@ where it's supposed to be. If any tokens are found out of place, we print an err
 and kill the program with an exit() call.
 */
 
-char **final_code;
+char *final_code;
 struct Variable *var = NULL;
 struct Label *label = NULL;
 struct Variable **vars = &var;
@@ -26,6 +26,9 @@ void program(struct Token *tokens) {
     //printf("PROGRAM\n");
     
     struct Token *tmp_tok = tokens;
+    final_code = malloc(37 * sizeof(char));
+    strcpy(final_code, "#include <stdio.h>\nint main(void) {\n");
+    printf("[%s]\n", final_code);
 
     while(tmp_tok->type == 2)
         tmp_tok = tmp_tok->next;
@@ -33,6 +36,7 @@ void program(struct Token *tokens) {
     while(tmp_tok != NULL) {
         tmp_tok = statement(tmp_tok);
     }
+    final_code = append_line(final_code, "return 0;\n}");
 }
 
 /*
@@ -48,15 +52,28 @@ struct Token *statement(struct Token *tokens) {
     struct Token *curr_tok = tokens;
     struct Variable *var_head = *vars;
     struct Label *label_head = *labels, *label_tmp;
+    char *tmp_code;
 
     // PRINT expression | string nl
     if(strcmp("PRINT", curr_tok->text) == 0) {
         //printf("STATEMENT -- PRINT\n");
         curr_tok = curr_tok->next;
-        if(isstring(curr_tok))
+        if(isstring(curr_tok)) {
+            tmp_code = malloc((curr_tok->len + 15) * sizeof(char));
+            strcpy(tmp_code, "printf(\"");
+            memcpy(tmp_code + 8, curr_tok->text, curr_tok->len);
+            strcpy(tmp_code + curr_tok->len + 8, "\\n\");\n");
+            final_code = append_line(final_code, tmp_code);
+            free(tmp_code);
             curr_tok = curr_tok->next;
+        }
         else {
+            tmp_code = malloc(9 * sizeof(char));
+            strcpy(tmp_code, "printf(\"");
+            final_code = append_line(final_code, tmp_code);
             curr_tok = expression(curr_tok);
+            final_code = append_line(final_code, "\\n\");\n");
+            free(tmp_code);
         }
     }
     // IF comparison THEN nl {statement} ENDIF nl
@@ -191,9 +208,9 @@ struct Token *expression(struct Token *curr_token) {
 // term ::= unary {( "/" | "*" ) unary}
 struct Token *term(struct Token *curr_token) {
     //printf("TERM\n");
-
+   
     curr_token = unary(curr_token);
-
+    printf("[%d]\n", curr_token->type);
     while(curr_token->type == 20 || curr_token->type == 21) {
         curr_token = unary(curr_token->next);
     }
@@ -206,7 +223,7 @@ struct Token *unary(struct Token *curr_token) {
 
     if(curr_token->type == 18 || curr_token->type == 19)
         curr_token = curr_token->next;
-    
+  
     curr_token = primary(curr_token);
    
     return curr_token;
