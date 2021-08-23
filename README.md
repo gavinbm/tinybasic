@@ -37,3 +37,12 @@ unary ::= ["+" | "-"] primary
 primary ::= number | ident
 nl ::= '\n'+
 ```
+
+The language currently supports:
+- Numerical variables
+- Basic arithmetic
+- If statements
+- While loops
+- Print text and numbers
+- Input numbers
+- Labels and goto
