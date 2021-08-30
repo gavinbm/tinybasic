@@ -9,13 +9,13 @@ where it's supposed to be. If any tokens are found out of place, we print an err
 and kill the program with an exit() call.
 */
 
-char *final_code;
-struct Variable *var = NULL;
-struct Label *label = NULL;
-struct Variable **vars = &var;
-struct Label **labels = &label;
+char *final_code;               // this string will be our final C code that gets written to the C file
+struct Variable *var = NULL;    // Our linked list of variables that will be filled as we parse
+struct Label *label = NULL;     // Out linked list of labels that will be filled as we parse
+struct Variable **vars = &var;  // A pointer to our variable list, this makes editing the list easier with double pointer tricks
+struct Label **labels = &label; // A pointer to our label list, once again, double pointer tricks are great
 
-// initializes the grammar for us to step through
+// first step to get us into the grammar so we can begin parsing
 void parse(struct Token *tokens) {
     //printf("PARSER STARTED\n");
     program(tokens);
@@ -24,17 +24,23 @@ void parse(struct Token *tokens) {
 // program ::= {statement}
 void program(struct Token *tokens) {
     //printf("PROGRAM\n");
-    
+    // set up a tmp poniter to for our tokens that came from the lexer
     struct Token *tmp_tok = tokens;
+
+    // allocate and initialize our C code
     final_code = malloc(37 * sizeof(char));
     strcpy(final_code, "#include <stdio.h>\nint main(void) {\n");
 
+    // skip leading white space/newline characters
     while(tmp_tok->type == 2)
         tmp_tok = tmp_tok->next;
 
+    // step through the basic code and parse the statements
     while(tmp_tok != NULL) {
         tmp_tok = statement(tmp_tok);
     }
+
+    // set the return 0 and ending of our C code
     final_code = append_line(final_code, "return 0;\n}");
 }
 
@@ -57,6 +63,10 @@ struct Token *statement(struct Token *tokens) {
     if(strcmp("PRINT", curr_tok->text) == 0) {
         //printf("STATEMENT -- PRINT\n");
         curr_tok = curr_tok->next;
+        /* 
+        if we're printing a string, we set up a printf for the string
+        and otherwise we have to set up a printf for a variable (only number vars) 
+        */
         if(isstring(curr_tok)) {
             tmp_code = malloc((curr_tok->len + 15) * sizeof(char));
             strcpy(tmp_code, "printf(\"");
@@ -76,16 +86,21 @@ struct Token *statement(struct Token *tokens) {
     else if(strcmp("IF", curr_tok->text) == 0) {
         //printf("STATEMENT -- IF\n");
         curr_tok = curr_tok->next;
+
+        // start the if statement and process the comparison
         final_code = append_line(final_code, "if(");
         curr_tok = comparison(curr_tok);
 
+        // we need to find a THEN (type 12) token and a newline after the comparison
         curr_tok = match(curr_tok, 12);
         curr_tok = nl(curr_tok);
 
+        // close the if statement, process the statements within the body of the if
         final_code = append_line(final_code, ") {\n");
         while(curr_tok->type != 13)
             curr_tok = statement(curr_tok);
         
+        // look for the ENDIF (type 13) token and close the if statement body
         curr_tok = match(curr_tok, 13);
         final_code = append_line(final_code, "\n}\n");
     }
@@ -93,16 +108,21 @@ struct Token *statement(struct Token *tokens) {
     else if(strcmp("WHILE", curr_tok->text) == 0) {
         //printf("STATEMENT -- WHILE\n");
         curr_tok = curr_tok->next;
+
+        // begin the while statement and look for the comparison
         final_code = append_line(final_code, "while(");
         curr_tok = comparison(curr_tok);
 
+        // we need a REPEAT (type 15) token and a newline after the WHILE
         curr_tok = match(curr_tok, 15);
         curr_tok = nl(curr_tok);
 
+        // close the while statement and process the body of it
         final_code = append_line(final_code, ") {\n");
         while(curr_tok->type != 16)
             curr_tok = statement(curr_tok);
         
+        // find the ENDWHILE (type 16) token and close the body of the while loop
         curr_tok = match(curr_tok, 16);
         final_code = append_line(final_code, "\n}\n");
     }
@@ -116,13 +136,17 @@ struct Token *statement(struct Token *tokens) {
         //printf("STATEMENT -- LABEL\n");
         curr_tok = curr_tok->next;
         
+        // check if the label has already been declared and throw an error if it has
         if(islabel(label_head, curr_tok->text)) {
             printf("LABEL ERROR: label [%s] already declared...\n", curr_tok->text);
             exit(4);
         }
+
+        // create the new label, adding it to our list and setting up the C code
         createlabel(labels, curr_tok->text);
         final_code = append_line(final_code, curr_tok->text);
         final_code = append_line(final_code, ":\n");
+        // LABEL must be followed by an identifier (which is the label name)
         curr_tok = match(curr_tok, 4);
     }
     // GOTO ident nl
@@ -130,12 +154,16 @@ struct Token *statement(struct Token *tokens) {
         //printf("STATEMENT -- GOTO\n");
         curr_tok = curr_tok->next;
 
+        // check if the label has been visited, mark it as visited if it has been
+        // throw an error if the label doesn't exist
         if((label_tmp = getlabel(label_head, curr_tok->text)) != NULL) {
             label_tmp->visited = 1;
         } else {
             printf("GOTO ERROR: label [%s] does not exist...\n", curr_tok->text);
             exit(5); 
         }
+
+        // setup the goto statement, look for the identifier (label name) after the GOTO
         final_code = append_line(final_code, "goto ");
         final_code = append_line(final_code, curr_tok->text);
         final_code = append_line(final_code, ";\n");
@@ -146,15 +174,26 @@ struct Token *statement(struct Token *tokens) {
         //printf("STATEMENT -- LET\n");
         curr_tok = curr_tok->next;
 
+        /* 
+        check if the variable exists already, create it (add it to our list)
+        if it's not already there, otherwise we're just updating the value of an existing
+        variable
+        */
         if(isvariable(var_head, curr_tok->text) == 0) {
             createvar(vars, curr_tok->text, atoi(curr_tok->next->text));
+            // we only have numeric vars, floats allow for division so we use those
             final_code = append_line(final_code, "float ");
             final_code = append_line(final_code, curr_tok->text);
             final_code = append_line(final_code, ";\n");
         }
+        // add the C code that will set the variables value
         final_code = append_line(final_code, curr_tok->text);
         final_code = append_line(final_code, " = ");
 
+        /* 
+        check for an identifer, equals sign, and expression
+        for example: this processes the "a = 1" part of "LET a = 1" 
+        */
         curr_tok = match(curr_tok, 4);
         curr_tok = match(curr_tok, 17);
         curr_tok = expression(curr_tok);
@@ -166,13 +205,23 @@ struct Token *statement(struct Token *tokens) {
         //("STATEMENT -- INPUT\n");
         curr_tok = curr_tok->next;
         
+        // check for the variable (ident that follows the INPUT) in our var list
+        // if it's there, we just fill/overwrite its value, otherwise we need to make it
         if(isvariable(var_head, curr_tok->text) == 0) {
             createvar(vars, curr_tok->text, atoi(curr_tok->next->text));
+            // decalring the new variable in our C code
             final_code = append_line(final_code, "float ");
             final_code = append_line(final_code, curr_tok->text);
             final_code = append_line(final_code, ";\n");
         }
 
+        /* 
+        set up the scanf that will fill our variable with the new value
+
+        NOTE: we do a bit extra here to check for errors in the input in case
+              scanf gives a bad exit code, this helps us avoid errors in the C code
+              and keep our INPUT functionality pretty simple for the user
+        */
         final_code = append_line(final_code, "if(scanf(\"%f\", ");
         final_code = append_line(final_code, "&");
         final_code = append_line(final_code, curr_tok->text);
@@ -181,6 +230,7 @@ struct Token *statement(struct Token *tokens) {
         final_code = append_line(final_code, " = 0;\n");
         final_code = append_line(final_code, "scanf(\"%*s\");\n}\n");
     
+        // look for the identifier after the INPUT
         curr_tok = match(curr_tok, 4);
     }
     // unkown statement
