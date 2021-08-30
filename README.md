@@ -4,11 +4,13 @@ and in [this github repo](https://github.com/AZHenley/teenytinycompiler). I did 
 school isn't offering it so I'm putting on my big boy pants and teaching myself how to write a compiler (with no memory leaks to boot!). The final goal is to compile to arm32 executables that can be run on a raspberry pi.
 
 # Building and Using
-1) clone the repo:             git clone https://github.com/gavinbm/tinybasic.git
-2) cd in the repo directory:   cd tinybasic
-3) run the makefile:           make 
-4) compile some basic:         ./tiny {path to basic file} {name of C file to be produced}
-5) Enjoy!!
+|          Step            |                  Commands to run                           |
+|--------------------------|------------------------------------------------------------|
+| clone the repo           | git clone https://github.com/gavinbm/tinybasic.git         |
+| cd in the repo directory | cd tinybasic                                               |
+| run the makefile         | make                                                       |
+| compile some basic:      | ./tiny {path to basic file} {name of new C file}           |
+| compile your C           | cc -o {exe name} {C file name}                             |
 
 An example use:                ./tiny tests/average.bas average.c
 
