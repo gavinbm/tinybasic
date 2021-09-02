@@ -36,6 +36,7 @@ statement ::= "PRINT" (expression | string) nl
             | "GOTO" ident nl
             | "LET" ident "=" expression nl
             | "INPUT" ident nl
+            | ident "=" expression nl
 comparison ::= expression (("==" | "!=" | ">" | ">=" | "<" | "<=") expression)+
 expression ::= term {( "-" | "+" ) term}
 term ::= unary {( "/" | "*" ) unary}
