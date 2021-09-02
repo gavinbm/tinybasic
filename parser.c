@@ -233,6 +233,25 @@ struct Token *statement(struct Token *tokens) {
         // look for the identifier after the INPUT
         curr_tok = match(curr_tok, 4);
     }
+    /*
+     Make LET optional for variables that have already been declared.
+     ident "=" expression nl
+    */
+    else if(isvariable(var_head, curr_tok->text)) {
+        // emit the variable name
+        final_code = append_line(final_code, curr_tok->text);
+        
+        // move to the next token and make sure it's an equal sign
+        curr_tok = curr_tok->next;
+        curr_tok = match(curr_tok, 17);
+
+        // emit the equal's sign
+        final_code = append_line(final_code, " = ");
+        
+        // match the expression from the grammar rule and add newline and semi-colon chars
+        curr_tok = expression(curr_tok);
+        final_code = append_line(final_code, ";\n");
+    }
     // unkown statement
     else {
         printf("INVALID TOKEN -- [%s]\n", curr_tok->text);
