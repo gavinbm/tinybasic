@@ -55,11 +55,11 @@ The language currently supports:
 - Labels and goto
 
 # Sample BASIC Programs and their C counterparts
-The tests directory holds a comprehensive catalogue of BASIC programs for you to demo the language and test it's features.
-The directory names are pretty self explanatory for what those programs test (i.e. optional-let is meant to show that LET is
+The tests directory holds a comprehensive catalogue of BASIC programs for you to demo the language and test its features.
+The directory names are pretty self-explanatory for what those programs test (i.e. optional-let is meant to show that LET is
 optional in all contexts). Here is a sample program and how it compiles to C
 
-This is one of the programs from simple-tests in the tests folder (average.bas) in it's pre-compiler BASIC form
+This is one of the programs from simple-tests in the tests folder (average.bas) in it's pre-compiled BASIC form
 ```BASIC
 LET a = 0
 WHILE a < 1 REPEAT
