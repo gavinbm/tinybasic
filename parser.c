@@ -126,11 +126,6 @@ struct Token *statement(struct Token *tokens) {
         curr_tok = match(curr_tok, 16);
         final_code = append_line(final_code, "\n}\n");
     }
-    // extra condition for ENDWHILE to conclude WHILE statement
-    else if(strcmp("ENDWHILE", curr_tok->text) == 0) {
-        //printf("STATEMENT -- ENDWHILE\n");
-        curr_tok = match(curr_tok, 16);
-    }
     // LABEL ident nl
     else if(strcmp("LABEL", curr_tok->text) == 0) {
         //printf("STATEMENT -- LABEL\n");
