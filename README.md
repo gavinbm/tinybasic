@@ -55,7 +55,7 @@ The language currently supports:
 - Labels and goto
 
 # Sample BASIC Programs and their C counterparts
-The tests directory holds a comprehensive catalogue of BASIC programs for you do demo the language and test it's features.
+The tests directory holds a comprehensive catalogue of BASIC programs for you to demo the language and test it's features.
 The directory names are pretty self explanatory for what those programs test (i.e. optional-let is meant to show that LET is
 optional in all contexts). Here is a sample program and how it compiles to C
 
