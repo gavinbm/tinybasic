@@ -54,8 +54,12 @@ The language currently supports:
 - Input numbers
 - Labels and goto
 
-# Sample BASIC Programs and their C counterparts           
-This is one of the programs from the tests folder (average.bas) in it's pre-compiled BASIC form
+# Sample BASIC Programs and their C counterparts
+The tests directory holds a comprehensive catalogue of BASIC programs for you do demo the language and test it's features.
+The directory names are pretty self explanatory for what those programs test (i.e. optional-let is meant to show that LET is
+optional in all contexts). Here is a sample program and how it compiles to C
+
+This is one of the programs from simple-tests in the tests folder (average.bas) in it's pre-compiler BASIC form
 ```BASIC
 LET a = 0
 WHILE a < 1 REPEAT
@@ -109,3 +113,35 @@ printf("%.2f\n", (float)(s/a));
 return 0;
 }
 ```
+
+# Things This Project Taught Me
+This is by far my favorite project I've done in my computer science career, and I intend to develop it until I can say
+it's deviated enough from Dr. Henley's grammar and design that I can call it mine. There's no doubt ways to make this program
+simpler and take fewer lines of code, but I've learned a ton about C programming and the application of automata theory
+so I'm not too concerned with reducing the number of lines of code I took to do things just yet. Overall if you're a 
+programmer or computer scientist, you HAVE to try writing a compiler or interpreter at some point, it's taught me more than
+any other project I've done.
+
+Catching Memory Errors and Leaks
+ - Always compile with the -ggdb flag when trying to test your programs, it will make valgrind show you what line
+   memory errors occur on making it MUCH easier than deciphering the standard hex value memory addresses.
+ - Memory errors in valgrind are much more problematic than I used to think. Many of my peers even are of the
+   the mindset "if there's no leaks and it runs on my machine it's good" and that's far more harmful than it seems.
+   Not only do they open up potential for crashing and undefined behavior, but they also create security flaws and
+   reduce the portability of your code as machines with different processors/memory capacity may hit critical errors
+   where your development machine doesn't
+ - C is a higher-level language; it's also the lowest of all portable general purpose languages. You need to code with
+   the machine in mind when writing C as you're able to directly interact with the memory and hardware in a way that
+   may seem mysterious/abstracted but in reality is still a very low-level operation. Take time to make precise allocations
+   where possible and if you must dynamically allocate, make sure to not lose your pointers and read the valgrind output
+   very carefully to find read/write and leak errors.
+
+Application of Automata Theory
+ - My favorite part; the theory. I've become something a theory nut in my last few semesters of college (shout-out to Dr. Carberry 
+   and Dr. Silber). All a compiler really is is an implementation of a grammar, usually it's a context-free grammar as most programming
+   languages are context-free languages. Being able to break a grammar into functions or methods and see how those theoretical concepts
+   get applied has no doubt improved my ability to write code that doesn't look awful.
+ - We can also see very clearly how reading the grammar (much easier than reading the code) would directly translate to being able to
+   understand the code since it's almost a 1:1 translation of production rules to functions. Even if we didn't follow that model of
+   functional decomposition, we'd still be able to see how each production rule gets applied in our code, allowing us to see not just
+   the code itself but the entire design philosophy behind it.

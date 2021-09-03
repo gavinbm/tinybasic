@@ -237,10 +237,18 @@ struct Token *statement(struct Token *tokens) {
      Make LET optional for variables that have already been declared.
      ident "=" expression nl
     */
-    else if(isvariable(var_head, curr_tok->text)) {
-        // emit the variable name
-        final_code = append_line(final_code, curr_tok->text);
+    else if(curr_tok->type == 4) {
         
+        // check whether this variable exists or not, if it doesn't we need to make it
+        if(isvariable(var_head, curr_tok->text) == 0) {
+            createvar(vars, curr_tok->text, atoi(curr_tok->next->text));
+            // decalring the new variable in our C code
+            final_code = append_line(final_code, "float ");
+            final_code = append_line(final_code, curr_tok->text);
+            final_code = append_line(final_code, ";\n");
+        }
+        // emit the var name for initlization/value assignment
+        final_code = append_line(final_code, curr_tok->text);
         // move to the next token and make sure it's an equal sign
         curr_tok = curr_tok->next;
         curr_tok = match(curr_tok, 17);
