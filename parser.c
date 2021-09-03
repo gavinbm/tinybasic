@@ -175,7 +175,7 @@ struct Token *statement(struct Token *tokens) {
         variable
         */
         if(isvariable(var_head, curr_tok->text) == 0) {
-            createvar(vars, curr_tok->text, atoi(curr_tok->next->text));
+            createvar(vars, curr_tok->text);
             // we only have numeric vars, floats allow for division so we use those
             final_code = append_line(final_code, "float ");
             final_code = append_line(final_code, curr_tok->text);
@@ -203,7 +203,7 @@ struct Token *statement(struct Token *tokens) {
         // check for the variable (ident that follows the INPUT) in our var list
         // if it's there, we just fill/overwrite its value, otherwise we need to make it
         if(isvariable(var_head, curr_tok->text) == 0) {
-            createvar(vars, curr_tok->text, atoi(curr_tok->next->text));
+            createvar(vars, curr_tok->text);
             // decalring the new variable in our C code
             final_code = append_line(final_code, "float ");
             final_code = append_line(final_code, curr_tok->text);
@@ -236,7 +236,7 @@ struct Token *statement(struct Token *tokens) {
         
         // check whether this variable exists or not, if it doesn't we need to make it
         if(isvariable(var_head, curr_tok->text) == 0) {
-            createvar(vars, curr_tok->text, atoi(curr_tok->next->text));
+            createvar(vars, curr_tok->text);
             // decalring the new variable in our C code
             final_code = append_line(final_code, "float ");
             final_code = append_line(final_code, curr_tok->text);
@@ -460,14 +460,13 @@ void createlabel(struct Label **labels, char *name) {
     *tmp = add;
 }
 
-void createvar(struct Variable **vars, char *name, int value) {
+void createvar(struct Variable **vars, char *name) {
     struct Variable **tmp = vars, *add;
     int name_len = strlen(name);
 
     add = malloc(sizeof(struct Variable));
     add->name = malloc(name_len + 1 * sizeof(char));
     strcpy(add->name, name);
-    add->value = value;
     add->next = NULL;
 
     while(*tmp)

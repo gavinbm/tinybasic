@@ -13,7 +13,6 @@ struct Token {
 
 struct Variable {
     char *name;
-    int value;
     struct Variable *next;
 };
 
@@ -53,7 +52,7 @@ int islabel(struct Label *labels, char *name);
 int isvariable(struct Variable *vars, char *name);
 
 void createlabel(struct Label **labels, char *name);
-void createvar(struct Variable **vars, char *name, int value);
+void createvar(struct Variable **vars, char *name);
 struct Label *getlabel(struct Label *labels, char *name);
 struct Variable *getvar(struct Variable *vars, char *name);
 
