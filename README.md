@@ -11,8 +11,8 @@ school isn't offering it so I'm putting on my big boy pants and teaching myself 
 | run the makefile         | make                                                       |
 | compile some basic:      | ./tiny {path to basic file} {name of new C file}           |
 | compile your C           | cc -o {exe name} {C file name}                             |
-
-An example use:                ./tiny tests/average.bas average.c
+|                          |                                                            |
+| Example compiler call    |./tiny tests/average.bas average.c                          |
 
 # Todo List and Milestones
 - [x] Complete the lexer
