@@ -28,8 +28,8 @@ void program(struct Token *tokens) {
     struct Token *tmp_tok = tokens;
 
     // allocate and initialize our C code
-    final_code = malloc(37 * sizeof(char));
-    strcpy(final_code, "#include <stdio.h>\nint main(void) {\n");
+    final_code = malloc(54 * sizeof(char));
+    memcpy(final_code, "#include <stdio.h>\nint main(int argc, char **argv) {\n", 54);
 
     // skip leading white space/newline characters
     while(tmp_tok->type == 2)
