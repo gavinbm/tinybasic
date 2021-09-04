@@ -12,6 +12,9 @@
                     WHILE    = 14   LTEQ  = 25
                     REPEAT   = 15   GT    = 26
                     ENDWHILE = 16   GTEQ  = 27
+                    READ     = 28
+                    WRITE    = 29
+                    INTO     = 30
 */
 
 /*
@@ -242,7 +245,7 @@ Sets up an array of all our possible token types and checks the given string to 
 the token type.
 */
 int iskeyword(char *str) {
-    char keywords[27][9] = {
+    char keywords[30][9] = {
         "EOF", "NEWLINE", "NUMBER",
         "IDENT", "STRING", "LABEL",
         "GOTO", "PRINT", "INPUT",
@@ -251,9 +254,10 @@ int iskeyword(char *str) {
         "ENDWHILE", "EQ", "PLUS",
         "MINUS", "MUL", "DIV",
         "EQEQ", "NOTEQ", "LT",
-        "LTEQ", "GT", "GTEQ"};
+        "LTEQ", "GT", "GTEQ",
+        "READ", "WRITE", "INTO"};
     
-    for(int i = 0; i < 27; ++i) {
+    for(int i = 0; i < 30; ++i) {
         if(strcmp(str, keywords[i]) == 0)
             return i + 1;
     }

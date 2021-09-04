@@ -4,6 +4,25 @@
 #include <ctype.h>
 #define MAXLEN 64
 
+/*          ---- Token Type Map ----
+    Specials        Keywords        Operators
+    EOF     = 1     LABEL    = 6    EQ    = 17
+    NEWLINE = 2     GOTO     = 7    PLUS  = 18
+    NUMBER  = 3     PRINT    = 8    MINUS = 19
+    IDENT   = 4     INPUT    = 9    MUL   = 20
+    STRING  = 5     LET      = 10   DIV   = 21
+                    IF       = 11   EQEQ  = 22
+                    THEN     = 12   NOTEQ = 23
+                    ENDIF    = 13   LT    = 24
+                    WHILE    = 14   LTEQ  = 25
+                    REPEAT   = 15   GT    = 26
+                    ENDWHILE = 16   GTEQ  = 27
+                    READ     = 28
+                    WRITE    = 29
+                    INTO     = 30
+*/
+
+
 struct Token {
     char *text;
     int len;
@@ -13,7 +32,6 @@ struct Token {
 
 struct Variable {
     char *name;
-    int value;
     struct Variable *next;
 };
 
@@ -47,15 +65,13 @@ struct Token *primary(struct Token *curr_token);
 struct Token *nl(struct Token *curr_token);
 struct Token *match(struct Token *token, int type);
 
-int isstring(struct Token *curr_token);
 int iscomparisonop(struct Token *curr_token);
 int islabel(struct Label *labels, char *name);
 int isvariable(struct Variable *vars, char *name);
 
 void createlabel(struct Label **labels, char *name);
-void createvar(struct Variable **vars, char *name, int value);
+void createvar(struct Variable **vars, char *name);
 struct Label *getlabel(struct Label *labels, char *name);
-struct Variable *getvar(struct Variable *vars, char *name);
 
 /* ---- emitter.c ---- */
 int write_file(char *filename, char *code);
