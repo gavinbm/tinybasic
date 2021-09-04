@@ -50,8 +50,6 @@ extern char *final_code;     // the final code to be emitted
 struct Token *lex(FILE *read);
 void createToken(struct Token **head, char *source, int type);
 int iskeyword(char *str);
-void print_tokens(struct Token *head);
-void free_tokens(struct Token *head);
 
 /* ---- parser.c ---- */
 void parse(struct Token *curr_token);
@@ -75,9 +73,7 @@ struct Label *getlabel(struct Label *labels, char *name);
 
 /* ---- emitter.c ---- */
 int write_file(char *filename, char *code);
-void prepend_line(char *curr_code, const char *new_code);
 char *append_line(char *curr_code, char *new_code);
-void emit(char *curr_code, char *new_code);
 
 /* ---- freeprint.c ----- */
 void print_tokens(struct Token *head);
