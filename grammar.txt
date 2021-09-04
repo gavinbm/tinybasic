@@ -7,8 +7,6 @@ statement ::= "PRINT" (expression | string) nl
             | "LET" ident "=" expression nl
             | "INPUT" ident nl
             | ident "=" expression nl
-            | READ (ident | string) INTO ident nl
-            | WRITE (ident | string) INTO (ident | string) nl
 comparison ::= expression (("==" | "!=" | ">" | ">=" | "<" | "<=") expression)+
 expression ::= term {( "-" | "+" ) term}
 term ::= unary {( "/" | "*" ) unary}
