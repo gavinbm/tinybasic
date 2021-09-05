@@ -85,7 +85,7 @@ void createlabel(struct Label **labels, char *name) {
 
     add = malloc(sizeof(struct Label));
     add->name = malloc(name_len * sizeof(char));
-    memcpy(add->name, name, name_len);
+    strcpy(add->name, name);
     add->visited = 0;
     add->next = NULL;
 
@@ -108,7 +108,7 @@ void createvar(struct Variable **vars, char *name, int type) {
 
     add = malloc(sizeof(struct Variable));
     add->name = malloc(name_len + 1 * sizeof(char));
-    memcpy(add->name, name, name_len);
+    strcpy(add->name, name);
     add->type = type;
     add->next = NULL;
 
@@ -137,6 +137,18 @@ struct Label *getlabel(struct Label *labels, char *name) {
     return NULL;
 }
 
+struct Variable *getvar(struct Variable *vars, char *name) {
+    struct Variable *tmp = vars;
+
+    while(tmp != NULL) {
+        if(strcmp(tmp->name, name) == 0)
+            return tmp;
+        
+        tmp = tmp->next;
+    }
+
+    return NULL;
+}
 /* -------- Free and Print functions -------- */
 
 /*
@@ -213,7 +225,7 @@ void print_vars(struct Variable *vars) {
     
     int i = 1;
     while(tmp != NULL) {
-        printf("[%s] -- [%d]\n", tmp->name, i);
+        printf("[%s] -- [%d]\n", tmp->name, tmp->type);
         tmp = tmp->next;
         i++;
     }

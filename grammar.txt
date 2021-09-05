@@ -4,12 +4,12 @@ statement ::= "PRINT" (expression | string) nl
             | "WHILE" comparison "REPEAT" nl {statement} "ENDWHILE" nl
             | "LABEL" ident nl
             | "GOTO" ident nl
-            | {"LET"} ident "=" (expression | char | string) nl
+            | {"LET"} ident "=" (expression | string) nl
             | "INPUT" ident nl
 comparison ::= expression (("==" | "!=" | ">" | ">=" | "<" | "<=") expression)+
 expression ::= term {( "-" | "+" ) term}
 term       ::= unary {( "/" | "*" ) unary}
 unary      ::= ["+" | "-"] primary
-primary    ::= number | ident
+primary    ::= number | char | ident
 char       ::= '(A ... z)'
 nl         ::= '\n'+

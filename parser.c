@@ -76,11 +76,21 @@ struct Token *statement(struct Token *tokens) {
                 final_code = append_line(final_code, tmp_code);
                 free(tmp_code);
                 curr_tok = curr_tok->next;
-            }
-            else {
-                final_code = append_line(final_code, "printf(\"%d\\n\", (int)(");
-                curr_tok = expression(curr_tok);
-                final_code = append_line(final_code, "));\n");
+            } else {
+                struct Variable *var_t = getvar(var_head, curr_tok->text);
+
+                if(var_t) {
+                    
+                    if(var_t->type == 0) {
+                        final_code = append_line(final_code, "printf(\"%d\\n\", (int)(");
+                        curr_tok = expression(curr_tok);
+                        final_code = append_line(final_code, "));\n"); 
+                    } else {
+                        final_code = append_line(final_code, "printf(\"%c\\n\", (int)(");
+                        curr_tok = expression(curr_tok);
+                        final_code = append_line(final_code, "));\n");
+                    }
+                }
             }
             break;
         // IF comparison THEN nl {statement} ENDIF nl
@@ -225,6 +235,16 @@ struct Token *statement(struct Token *tokens) {
                     final_code = append_line(final_code, "int ");
                     final_code = append_line(final_code, curr_tok->text);
                     final_code = append_line(final_code, ";\n");
+                } else {
+                    // if the variable doesn't exist, we have to make sure the type is correct
+                    struct Variable *var_t = getvar(var_head, curr_tok->text);
+                    
+                    if(curr_tok->next->next->type == 28) {
+                        var_t->type = 1;
+                    } else {
+                        var_t->type = 0;
+                    }
+
                 }
                 // emit the var name for initlization/value assignment
                 final_code = append_line(final_code, curr_tok->text);
@@ -236,11 +256,7 @@ struct Token *statement(struct Token *tokens) {
                 final_code = append_line(final_code, " = ");
                 
                 // match the expression from the grammar rule and add newline and semi-colon chars
-                if(curr_tok->type == 28) {
-                    curr_tok = character(curr_tok);
-                } else {
-                    curr_tok = expression(curr_tok);
-                }
+                curr_tok = expression(curr_tok);
                 final_code = append_line(final_code, ";\n");
                 break;
             }
@@ -332,7 +348,14 @@ struct Token *primary(struct Token *curr_token) {
                 printf("PRIMARY ERROR: variable [%s] does not exist...\n", curr_token->text);
                 exit(5);
             }
+            
             final_code = append_line(final_code, curr_token->text);
+            curr_token = curr_token->next;
+            break;
+        case 28:
+            final_code = append_line(final_code, "\'");
+            final_code = append_line(final_code, curr_token->text);
+            final_code = append_line(final_code, "\'");
             curr_token = curr_token->next;
             break;
         default:

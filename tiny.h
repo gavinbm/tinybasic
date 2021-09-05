@@ -77,6 +77,7 @@ int isvariable(struct Variable *vars, char *name);
 void createlabel(struct Label **labels, char *name);
 void createvar(struct Variable **vars, char *name, int type);
 struct Label *getlabel(struct Label *labels, char *name);
+struct Variable *getvar(struct Variable *vars, char *name);
 
 void print_tokens(struct Token *head);
 void free_tokens(struct Token *head);
