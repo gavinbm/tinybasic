@@ -5,7 +5,6 @@ int main(int argc, char **argv) {
     if(argc == 3) {
         FILE *read = fopen(argv[1], "r");   // the Tiny BASIC source code file
         struct Token *tokens = lex(read);   // the tokens after lexical analysis
-        
         parse(tokens);                      // syntax analysis
 
         write_file(argv[2], final_code);

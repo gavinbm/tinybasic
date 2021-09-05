@@ -17,9 +17,6 @@
                     WHILE    = 14   LTEQ  = 25
                     REPEAT   = 15   GT    = 26
                     ENDWHILE = 16   GTEQ  = 27
-                    READ     = 28
-                    WRITE    = 29
-                    INTO     = 30
 */
 
 

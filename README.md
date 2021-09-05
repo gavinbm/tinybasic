@@ -52,6 +52,7 @@ The language currently supports:
 - Print text and numbers
 - Input numbers
 - Labels and goto
+- Single-line Comments (begin line with #)
 
 # Sample BASIC Programs and their C counterparts
 The tests directory holds a comprehensive catalogue of BASIC programs for you to demo the language and test its features.

@@ -167,6 +167,13 @@ struct Token *lex(FILE *read) {
                 case '\0':
                     createToken(&tokens, "\\0", 1);
                     break;
+                // handle comments, we don't even want to tokenize these to save memory
+                // all comments are single line and begin with a #
+                // we're just gonna run over the whole line until we hit a new line char
+                case '#':
+                    while(buffer[i] != '\n')
+                        i++;
+                    break;
                 // handle all other tokens, including keywords, variables, and numeric literals
                 default:
                     // curr_char is a letter
