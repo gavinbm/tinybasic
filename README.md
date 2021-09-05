@@ -29,7 +29,7 @@ Here is the current grammar, I may change this later to make it more feature ric
 ```
 program ::= {statement}
 statement ::= "PRINT" (expression | string) nl
-            | "IF" comparison "THEN" nl {statement} "ENDIF" nl
+            | "IF" (comparison | ident) "THEN" nl {statement} "ENDIF" nl
             | "WHILE" comparison "REPEAT" nl {statement} "ENDWHILE" nl
             | "LABEL" ident nl
             | "GOTO" ident nl

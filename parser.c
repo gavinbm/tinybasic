@@ -90,8 +90,14 @@ struct Token *statement(struct Token *tokens) {
 
             // start the if statement and process the comparison
             final_code = append_line(final_code, "if(");
-            curr_tok = comparison(curr_tok);
 
+            // check whether if it's an ident or a comparison
+            if(curr_tok->type == 4) {
+                final_code = append_line(final_code, curr_tok->text);
+                curr_tok = curr_tok->next;
+            } else {
+                curr_tok = comparison(curr_tok);
+            }
             // we need to find a THEN (type 12) token and a newline after the comparison
             curr_tok = match(curr_tok, 12);
             curr_tok = nl(curr_tok);
