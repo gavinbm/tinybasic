@@ -4,12 +4,12 @@ LET sum = 0
 
 LET num = 0
 PRINT "Enter number of inputs: "
-INPUT num
+GET INT num
 
 LET i = 0
 LET c = 0
 WHILE i < num REPEAT
-    INPUT c
+    GET INT c
     IF i == 0 THEN
         LET minsofar = c
         LET maxsofar = c
