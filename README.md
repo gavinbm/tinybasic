@@ -35,6 +35,7 @@ Here is the current grammar, it will most definitely change as I add features or
  - []  Means zero or one of what's inside
  - {}  Means zero or more of what's inside
  - +   Means one or more of whatever is left of the +
+ 
 Keywords or operators, things that are always needed as constants, are written in double quotation marks
 
 Not every feature that you find in the grammar is implemented yet, as of right now the feature list below the grammar should be considered the final reference for what the language can do. I'm currently working on implementing arrays so any rule or part of any rule that deals with arrays should be ignored.
