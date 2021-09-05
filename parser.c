@@ -78,7 +78,7 @@ struct Token *statement(struct Token *tokens) {
                 curr_tok = curr_tok->next;
             }
             else {
-                final_code = append_line(final_code, "printf(\"%.2f\\n\", (float)(");
+                final_code = append_line(final_code, "printf(\"%d\\n\", (int)(");
                 curr_tok = expression(curr_tok);
                 final_code = append_line(final_code, "));\n");
             }
@@ -184,7 +184,7 @@ struct Token *statement(struct Token *tokens) {
             if(isvariable(var_head, curr_tok->text) == 0) {
                 createvar(vars, curr_tok->text);
                 // we only have numeric vars, floats allow for division so we use those
-                final_code = append_line(final_code, "float ");
+                final_code = append_line(final_code, "int ");
                 final_code = append_line(final_code, curr_tok->text);
                 final_code = append_line(final_code, ";\n");
             }
@@ -212,7 +212,7 @@ struct Token *statement(struct Token *tokens) {
             if(isvariable(var_head, curr_tok->text) == 0) {
                 createvar(vars, curr_tok->text);
                 // decalring the new variable in our C code
-                final_code = append_line(final_code, "float ");
+                final_code = append_line(final_code, "int ");
                 final_code = append_line(final_code, curr_tok->text);
                 final_code = append_line(final_code, ";\n");
             }
@@ -224,7 +224,7 @@ struct Token *statement(struct Token *tokens) {
                 scanf gives a bad exit code, this helps us avoid errors in the C code
                 and keep our INPUT functionality pretty simple for the user
             */
-            final_code = append_line(final_code, "if(scanf(\"%f\", ");
+            final_code = append_line(final_code, "if(scanf(\"%d\", ");
             final_code = append_line(final_code, "&");
             final_code = append_line(final_code, curr_tok->text);
             final_code = append_line(final_code, ") == 0) {\n");
@@ -244,7 +244,7 @@ struct Token *statement(struct Token *tokens) {
             if(isvariable(var_head, curr_tok->text) == 0) {
                 createvar(vars, curr_tok->text);
                 // decalring the new variable in our C code
-                final_code = append_line(final_code, "float ");
+                final_code = append_line(final_code, "int ");
                 final_code = append_line(final_code, curr_tok->text);
                 final_code = append_line(final_code, ";\n");
             }

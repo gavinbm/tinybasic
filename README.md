@@ -19,7 +19,10 @@ school isn't offering it so I'm putting on my big boy pants and teaching myself 
 - [x] Complete the C emitter
 - [ ] Complete the ARM emitter
 - [x] Complete testing suite with sample programs
-- [ ] Add support for file reading/writing
+- [ ] Add arrays and strings (strings will be char arrays like in C)
+  - [ ] Static allocation of arrays, no dynamic
+  - [ ] Access elements via indexing
+  - [ ] Chars assined in the form ident = '(letter)' 
 - [ ] Add support for pointers 
 - [ ] Write a REPL
 - [ ] Use this to land a job, retire at 50, and spend my golden years fishing on Lake Superior
