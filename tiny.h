@@ -11,12 +11,16 @@
     NUMBER  = 3     PRINT    = 8    MINUS = 19
     IDENT   = 4     INPUT    = 9    MUL   = 20
     STRING  = 5     LET      = 10   DIV   = 21
-                    IF       = 11   EQEQ  = 22
+    CHAR    = 28    IF       = 11   EQEQ  = 22
                     THEN     = 12   NOTEQ = 23
                     ENDIF    = 13   LT    = 24
                     WHILE    = 14   LTEQ  = 25
                     REPEAT   = 15   GT    = 26
                     ENDWHILE = 16   GTEQ  = 27
+
+    These will be assigned to each token as we lex the BASIC file
+    allowing us to decipher what kind of token we're looking at when
+    we parse the tokens.
 */
 
 
@@ -29,6 +33,7 @@ struct Token {
 
 struct Variable {
     char *name;
+    int type;
     struct Variable *next;
 };
 
@@ -57,22 +62,23 @@ struct Token *expression(struct Token *curr_token);
 struct Token *term(struct Token *curr_token);
 struct Token *unary(struct Token *curr_token);
 struct Token *primary(struct Token *curr_token);
+struct Token *character(struct Token *curr_token);
 struct Token *nl(struct Token *curr_token);
 struct Token *match(struct Token *token, int type);
-
-int iscomparisonop(struct Token *curr_token);
-int islabel(struct Label *labels, char *name);
-int isvariable(struct Variable *vars, char *name);
-
-void createlabel(struct Label **labels, char *name);
-void createvar(struct Variable **vars, char *name);
-struct Label *getlabel(struct Label *labels, char *name);
 
 /* ---- emitter.c ---- */
 int write_file(char *filename, char *code);
 char *append_line(char *curr_code, char *new_code);
 
-/* ---- freeprint.c ----- */
+/* ---- util.c ----- */
+int iscomparisonop(struct Token *curr_token);
+int islabel(struct Label *labels, char *name);
+int isvariable(struct Variable *vars, char *name);
+
+void createlabel(struct Label **labels, char *name);
+void createvar(struct Variable **vars, char *name, int type);
+struct Label *getlabel(struct Label *labels, char *name);
+
 void print_tokens(struct Token *head);
 void free_tokens(struct Token *head);
 void free_vars(struct Variable *vars);

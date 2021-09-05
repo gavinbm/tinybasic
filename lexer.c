@@ -159,6 +159,17 @@ struct Token *lex(FILE *read) {
                     createToken(&tokens, substr, 5);
                     free(substr);
                     break;
+                // handle individual char's, these can be put in variables and must be 
+                // in between single quote marks (identical to the standard C syntax)
+                case '\'':
+                    i++;
+                    substr = malloc(2 * sizeof(char));
+                    substr[0] = buffer[i];
+                    substr[1] = '\0';
+                    createToken(&tokens, substr, 28);
+                    free(substr);
+                    i++;
+                    break;
                 // handle new lines, these mark the end of a statement and are not tokenized
                 case '\n':
                     createToken(&tokens, "\\n", 2);

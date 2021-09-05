@@ -179,7 +179,7 @@ struct Token *statement(struct Token *tokens) {
             // check for the variable (ident that follows the INPUT) in our var list
             // if it's there, we just fill/overwrite its value, otherwise we need to make it
             if(isvariable(var_head, curr_tok->text) == 0) {
-                createvar(vars, curr_tok->text);
+                createvar(vars, curr_tok->text, 0);
                 // decalring the new variable in our C code
                 final_code = append_line(final_code, "int ");
                 final_code = append_line(final_code, curr_tok->text);
@@ -214,7 +214,13 @@ struct Token *statement(struct Token *tokens) {
                 
                 // check whether this variable exists or not, if it doesn't we need to make it
                 if(isvariable(var_head, curr_tok->text) == 0) {
-                    createvar(vars, curr_tok->text);
+                    // check whether it's a char or int and assign the right type value
+                    // if it's a char, we assign 1, if it's an int we assign 0
+                    if(curr_tok->next->next->type == 28) {
+                        createvar(vars, curr_tok->text, 1);
+                    } else {
+                        createvar(vars, curr_tok->text, 0);
+                    }
                     // decalring the new variable in our C code
                     final_code = append_line(final_code, "int ");
                     final_code = append_line(final_code, curr_tok->text);
@@ -230,7 +236,11 @@ struct Token *statement(struct Token *tokens) {
                 final_code = append_line(final_code, " = ");
                 
                 // match the expression from the grammar rule and add newline and semi-colon chars
-                curr_tok = expression(curr_tok);
+                if(curr_tok->type == 28) {
+                    curr_tok = character(curr_tok);
+                } else {
+                    curr_tok = expression(curr_tok);
+                }
                 final_code = append_line(final_code, ";\n");
                 break;
             }
@@ -334,6 +344,21 @@ struct Token *primary(struct Token *curr_token) {
     return curr_token;
 }
 
+// char ::= '(A ... z)'
+struct Token *character(struct Token *curr_token) {
+    if(curr_token->type == 28) {
+        final_code = append_line(final_code, "\'");
+        final_code = append_line(final_code, curr_token->text);
+        final_code = append_line(final_code, "\'");
+    } else {
+        printf("CHAR ERROR -- Expected type 28 but got %d...", curr_token->type);
+        exit(9);
+    }
+
+    curr_token = curr_token->next;
+    return curr_token;
+}
+
 // nl ::= '\n'+
 struct Token *nl(struct Token *curr_token) {
     //printf("NEWLINE\n");
@@ -359,102 +384,4 @@ struct Token *match(struct Token *token, int type) {
         printf("MATCH ERROR: expected type [%d] but got [%d]...\n", type, token->type);
         exit(2);
     }
-}
-
-int iscomparisonop(struct Token *curr_token) {
-    switch(curr_token->type) {
-        case 22:
-            return 22;
-            break;
-        case 23:
-            return 23;
-            break;
-        case 24:
-            return 24;
-            break;
-        case 25:
-            return 25;
-            break;
-        case 26:
-            return 26;
-            break;
-        case 27:
-            return 27;
-            break;
-        default:
-            return 0;
-            break;
-    }
-}
-
-int islabel(struct Label *labels, char *name) {
-    struct Label *tmp = labels;
-    
-    while(tmp != NULL) {
-        if(strcmp(tmp->name, name) == 0)
-            return 1;
-        
-        tmp = tmp->next;
-    }
-
-    return 0;
-}
-
-int isvariable(struct Variable *vars, char *name) {
-    struct Variable *tmp = vars;
-    
-    while(tmp != NULL) {
-        if(strcmp(tmp->name, name) == 0)
-            return 1;
-        
-        tmp = tmp->next;
-    }
-
-    return 0;
-}
-
-void createlabel(struct Label **labels, char *name) {
-    struct Label **tmp = labels, *add;
-    int name_len = strlen(name);
-
-    add = malloc(sizeof(struct Label));
-    add->name = malloc(name_len * sizeof(char));
-    strcpy(add->name, name);
-    add->visited = 0;
-    add->next = NULL;
-
-    while(*tmp)
-        tmp = &(*tmp)->next;
-    
-    add->next = *tmp;
-    *tmp = add;
-}
-
-void createvar(struct Variable **vars, char *name) {
-    struct Variable **tmp = vars, *add;
-    int name_len = strlen(name);
-
-    add = malloc(sizeof(struct Variable));
-    add->name = malloc(name_len + 1 * sizeof(char));
-    strcpy(add->name, name);
-    add->next = NULL;
-
-    while(*tmp)
-        tmp = &(*tmp)->next;
-    
-    add->next = *tmp;
-    *tmp = add;
-}
-
-struct Label *getlabel(struct Label *labels, char *name) {
-    struct Label *tmp = labels;
-
-    while(tmp != NULL) {
-        if(strcmp(tmp->name, name) == 0)
-            return tmp;
-        
-        tmp = tmp->next;
-    }
-
-    return NULL;
 }
