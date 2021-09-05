@@ -28,8 +28,16 @@ school isn't offering it so I'm putting on my big boy pants and teaching myself 
 - [ ] Use this to land a job, retire at 50, and spend my golden years fishing on Lake Superior
 
 # The Grammar and Features
-Here is the current grammar, I may change this later to make it more feature rich or to just be stylistically different (i.e. reading files, only goto statements for looping to make it more assembly-esqe, etc.). As of right now it's just the grammar from Dr. Henley's article but with optional LET statements. I'd also like to write a REPL for this so it behaves a bit more like some BASICs or FORTHs but I'm getting a bit ahead of myself with that.
+Here is the current grammar, it will most definitely change as I add features or change current ones. The notation is as follows:
+::= Refers to a definition of a rule; the rule will be on the left side and the definition on the right
+|   Is a logical or
+()  Is just for grouping
+[]  Means zero or one of what's inside
+{}  Means zero or more of what's inside
++   Means one or more of whatever is left of the +
+Keywords or operators, things that are always needed as constants, are written in double quotation marks
 
+Not every feature that you find in the grammar is implemented yet, as of right now the feature list below the grammar should be considered the final reference for what the language can do. I'm currently working on implementing arrays so any rule or part of any rule that deals with arrays should be ignored.
 ```
 program   ::= {statement}
 statement ::= "PRINT" (expression | string) nl
@@ -37,14 +45,15 @@ statement ::= "PRINT" (expression | string) nl
             | "WHILE" comparison "REPEAT" nl {statement} "ENDWHILE" nl
             | "LABEL" ident nl
             | "GOTO" ident nl
-            | {"LET"} ident "=" (expression | char | string) nl
+            | {"LET"} ident{[number]} "=" (expression | char | array) nl
             | "GET" ("INT" | "CHAR") ident nl
 comparison ::= expression (("==" | "!=" | ">" | ">=" | "<" | "<=") expression)+
 expression ::= term {( "-" | "+" ) term}
 term       ::= unary {( "/" | "*" ) unary}
 unary      ::= ["+" | "-"] primary
-primary    ::= number | ident
-char       ::= '(a...z | A...Z)'
+primary    ::= number | array | char | ident
+array      ::= [(number | char)]
+char       ::= '(A ... z)'
 nl         ::= '\n'+
 ```
 
@@ -55,57 +64,56 @@ The language currently supports:
 - If statements
 - While loops
 - Print text and numbers
-- Input numbers
+- Input numbers and characters
 - Labels and goto
 - Single-line Comments (begin line with #)
 
 # Sample BASIC Programs and their C counterparts
-The tests directory holds a comprehensive catalogue of BASIC programs for you to demo the language and test its features.
-The directory names are pretty self-explanatory for what those programs test (i.e. optional-let is meant to show that LET is
-optional in all contexts). Here is a sample program and how it compiles to C
+The tests directory holds a comprehensive catalogue of BASIC programs for you to demo the language and test its features. Most of the tests are taken right from Dr. Henley's repo, but some are mine and I've edited a few to match my version of the language.
 
 This is one of the programs from simple-tests in the tests folder (average.bas) in it's pre-compiled BASIC form
 ```BASIC
 LET a = 0
 WHILE a < 1 REPEAT
     PRINT "Enter number of scores: "
-    INPUT a
+    GET INT a
 ENDWHILE
 
 LET b = 0
 LET s = 0
 PRINT "Enter one value at a time: "
 WHILE b < a REPEAT
-    INPUT c
+    GET INT c
     LET s = s + c
     LET b = b + 1
 ENDWHILE
 
 PRINT "Average: "
 PRINT s / a
+
 ```
 And here is the same program after being compiled into C
 ```C
 #include <stdio.h>
-int main(void) {
-float a;
+int main(int argc, char **argv) {
+int a;
 a = 0;
 while(a<1) {
 printf("Enter number of scores: \n");
-if(scanf("%f", &a) == 0) {
+if(scanf("%d", &a) == 0) {
 a = 0;
 scanf("%*s");
 }
 
 }
-float b;
+int b;
 b = 0;
-float s;
+int s;
 s = 0;
 printf("Enter one value at a time: \n");
 while(b<a) {
-float c;
-if(scanf("%f", &c) == 0) {
+int c;
+if(scanf("%d", &c) == 0) {
 c = 0;
 scanf("%*s");
 }
@@ -114,7 +122,7 @@ b = b+1;
 
 }
 printf("Average: \n");
-printf("%.2f\n", (float)(s/a));
+printf("%d\n", (int)(s/a));
 return 0;
 }
 ```
