@@ -55,7 +55,7 @@ statement ::= "PRINT" (expression | string) nl
 */
 struct Token *statement(struct Token *tokens) {
     struct Token *curr_tok = tokens;
-    struct Variable *var_head = *vars;
+    struct Variable *var_head = *vars, *var_t;
     struct Label *label_head = *labels, *label_tmp;
     char *tmp_code;
 
@@ -77,7 +77,7 @@ struct Token *statement(struct Token *tokens) {
                 free(tmp_code);
                 curr_tok = curr_tok->next;
             } else {
-                struct Variable *var_t = getvar(var_head, curr_tok->text);
+                var_t = getvar(var_head, curr_tok->text);
 
                 if(var_t) {
                     
@@ -181,37 +181,90 @@ struct Token *statement(struct Token *tokens) {
             final_code = append_line(final_code, ";\n");
             curr_tok = match(curr_tok, 4);
             break;
-        // INPUT ident nl
+        // GET (CHAR | INT) ident nl
         case 9:
-            //("STATEMENT -- INPUT\n");
+            //("STATEMENT -- GET\n");
             curr_tok = curr_tok->next;
             
-            // check for the variable (ident that follows the INPUT) in our var list
-            // if it's there, we just fill/overwrite its value, otherwise we need to make it
-            if(isvariable(var_head, curr_tok->text) == 0) {
-                createvar(vars, curr_tok->text, 0);
-                // decalring the new variable in our C code
-                final_code = append_line(final_code, "int ");
+            // We're reading a character
+            if(curr_tok->type == 28) {
+                // move to the ident
+                curr_tok = curr_tok->next;
+
+                 // check for the variable (ident that follows the INPUT) in our var list
+                // if it's there, we just fill/overwrite its value, otherwise we need to make it
+                if(isvariable(var_head, curr_tok->text) == 0) {
+                    createvar(vars, curr_tok->text, 1);
+                    // decalring the new variable in our C code
+                    final_code = append_line(final_code, "char ");
+                    final_code = append_line(final_code, curr_tok->text);
+                    final_code = append_line(final_code, ";\n");
+                } else {
+                    // we have to make sure the var type is a char
+                    var_t = getvar(var_head, curr_tok->text);
+                    var_t->type = 1;
+                }
+                /* 
+                set up the scanf that will fill our variable with the new value
+
+                NOTE: we do a bit extra here to check for errors in the input in case
+                    scanf gives a bad exit code, this helps us avoid errors in the C code
+                    and keep our INPUT functionality pretty simple for the user
+                */
+                final_code = append_line(final_code, "if(scanf(\" %c\", ");
+                final_code = append_line(final_code, "&");
                 final_code = append_line(final_code, curr_tok->text);
-                final_code = append_line(final_code, ";\n");
+                final_code = append_line(final_code, ") == 0) {\n");
+                final_code = append_line(final_code, curr_tok->text);
+                final_code = append_line(final_code, " = 0;\n");
+                final_code = append_line(final_code, "scanf(\"%*s\");\n}\n");
+                // final_code = append_line(final_code, "if((");
+                // final_code = append_line(final_code, curr_tok->text);
+                // final_code = append_line(final_code, " = getchar()) == EOF) {\n");
+                // final_code = append_line(final_code, curr_tok->text);
+                // final_code = append_line(final_code, " = 0;\n}\n");
+            }
+            // We're reading an integer
+            else if(curr_tok->type == 29) {
+                // move to the ident
+                curr_tok = curr_tok->next;
+
+                // check for the variable (ident that follows the INPUT) in our var list
+                // if it's there, we just fill/overwrite its value, otherwise we need to make it
+                if(isvariable(var_head, curr_tok->text) == 0) {
+                    createvar(vars, curr_tok->text, 0);
+                    // decalring the new variable in our C code
+                    final_code = append_line(final_code, "int ");
+                    final_code = append_line(final_code, curr_tok->text);
+                    final_code = append_line(final_code, ";\n");
+                } else {
+                    // we have to make sure the var type is an int
+                    var_t = getvar(var_head, curr_tok->text);
+                    var_t->type = 0;
+                }
+
+                /* 
+                set up the scanf that will fill our variable with the new value
+
+                NOTE: we do a bit extra here to check for errors in the input in case
+                    scanf gives a bad exit code, this helps us avoid errors in the C code
+                    and keep our INPUT functionality pretty simple for the user
+                */
+                final_code = append_line(final_code, "if(scanf(\"%d\", ");
+                final_code = append_line(final_code, "&");
+                final_code = append_line(final_code, curr_tok->text);
+                final_code = append_line(final_code, ") == 0) {\n");
+                final_code = append_line(final_code, curr_tok->text);
+                final_code = append_line(final_code, " = 0;\n");
+                final_code = append_line(final_code, "scanf(\"%*s\");\n}\n");
+            } 
+            // Unrecognized keyword
+            else {
+                printf("GET ERROR -- Expected \"CHAR\" or \"INT\" -- Got [%s]\n", curr_tok->text);
+                exit(10);
             }
 
-            /* 
-            set up the scanf that will fill our variable with the new value
-
-            NOTE: we do a bit extra here to check for errors in the input in case
-                scanf gives a bad exit code, this helps us avoid errors in the C code
-                and keep our INPUT functionality pretty simple for the user
-            */
-            final_code = append_line(final_code, "if(scanf(\"%d\", ");
-            final_code = append_line(final_code, "&");
-            final_code = append_line(final_code, curr_tok->text);
-            final_code = append_line(final_code, ") == 0) {\n");
-            final_code = append_line(final_code, curr_tok->text);
-            final_code = append_line(final_code, " = 0;\n");
-            final_code = append_line(final_code, "scanf(\"%*s\");\n}\n");
-        
-            // look for the identifier after the INPUT
+            // look for the identifier after the CHAR | INT
             curr_tok = match(curr_tok, 4);
             break;
         default:
@@ -228,23 +281,26 @@ struct Token *statement(struct Token *tokens) {
                     // if it's a char, we assign 1, if it's an int we assign 0
                     if(curr_tok->next->next->type == 28) {
                         createvar(vars, curr_tok->text, 1);
+                        // decalring the new variable in our C code
+                        final_code = append_line(final_code, "char ");
+                        final_code = append_line(final_code, curr_tok->text);
+                        final_code = append_line(final_code, ";\n");
                     } else {
                         createvar(vars, curr_tok->text, 0);
+                        // decalring the new variable in our C code
+                        final_code = append_line(final_code, "int ");
+                        final_code = append_line(final_code, curr_tok->text);
+                        final_code = append_line(final_code, ";\n");
                     }
-                    // decalring the new variable in our C code
-                    final_code = append_line(final_code, "int ");
-                    final_code = append_line(final_code, curr_tok->text);
-                    final_code = append_line(final_code, ";\n");
                 } else {
                     // if the variable doesn't exist, we have to make sure the type is correct
-                    struct Variable *var_t = getvar(var_head, curr_tok->text);
+                    var_t = getvar(var_head, curr_tok->text);
                     
                     if(curr_tok->next->next->type == 28) {
                         var_t->type = 1;
                     } else {
                         var_t->type = 0;
                     }
-
                 }
                 // emit the var name for initlization/value assignment
                 final_code = append_line(final_code, curr_tok->text);
