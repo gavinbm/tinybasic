@@ -29,6 +29,7 @@ school isn't offering it so I'm putting on my big boy pants and teaching myself 
 
 # The Grammar and Features
 Here is the current grammar, I may change this later to make it more feature rich or to just be stylistically different (i.e. reading files, only goto statements for looping to make it more assembly-esqe, etc.). As of right now it's just the grammar from Dr. Henley's article but with optional LET statements. I'd also like to write a REPL for this so it behaves a bit more like some BASICs or FORTHs but I'm getting a bit ahead of myself with that.
+
 ```
 program   ::= {statement}
 statement ::= "PRINT" (expression | string) nl

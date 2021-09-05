@@ -50,3 +50,4 @@ clean-tests:
 
 clean-full:
 	rm *.o tiny $(tests)
+	

@@ -23,7 +23,6 @@
     we parse the tokens.
 */
 
-
 struct Token {
     char *text;
     int len;

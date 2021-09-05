@@ -385,3 +385,4 @@ struct Token *match(struct Token *token, int type) {
         exit(2);
     }
 }
+

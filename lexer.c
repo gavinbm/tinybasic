@@ -1,4 +1,5 @@
 #include "tiny.h"
+
 /*          ---- Token Type Map ----
     Specials        Keywords        Operators
     EOF     = 1     LABEL    = 6    EQ    = 17
