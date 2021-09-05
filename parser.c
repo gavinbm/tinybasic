@@ -92,7 +92,7 @@ struct Token *statement(struct Token *tokens) {
             final_code = append_line(final_code, "if(");
 
             // check whether if it's an ident or a comparison
-            if(curr_tok->type == 4) {
+            if(curr_tok->type == 4 && !iscomparisonop(curr_tok->next)) {
                 final_code = append_line(final_code, curr_tok->text);
                 curr_tok = curr_tok->next;
             } else {
@@ -172,36 +172,36 @@ struct Token *statement(struct Token *tokens) {
             curr_tok = match(curr_tok, 4);
             break;
         // LET ident = {expression} nl
-        case 10:
-            //printf("STATEMENT -- LET\n");
-            curr_tok = curr_tok->next;
+        // case 10:
+        //     //printf("STATEMENT -- LET\n");
+        //     curr_tok = curr_tok->next;
 
-            /* 
-            check if the variable exists already, create it (add it to our list)
-            if it's not already there, otherwise we're just updating the value of an existing
-            variable
-            */
-            if(isvariable(var_head, curr_tok->text) == 0) {
-                createvar(vars, curr_tok->text);
-                // we only have numeric vars, floats allow for division so we use those
-                final_code = append_line(final_code, "int ");
-                final_code = append_line(final_code, curr_tok->text);
-                final_code = append_line(final_code, ";\n");
-            }
-            // add the C code that will set the variables value
-            final_code = append_line(final_code, curr_tok->text);
-            final_code = append_line(final_code, " = ");
+        //     /* 
+        //     check if the variable exists already, create it (add it to our list)
+        //     if it's not already there, otherwise we're just updating the value of an existing
+        //     variable
+        //     */
+        //     if(isvariable(var_head, curr_tok->text) == 0) {
+        //         createvar(vars, curr_tok->text);
+        //         // we only have numeric vars, floats allow for division so we use those
+        //         final_code = append_line(final_code, "int ");
+        //         final_code = append_line(final_code, curr_tok->text);
+        //         final_code = append_line(final_code, ";\n");
+        //     }
+        //     // add the C code that will set the variables value
+        //     final_code = append_line(final_code, curr_tok->text);
+        //     final_code = append_line(final_code, " = ");
 
-            /* 
-            check for an identifer, equals sign, and expression
-            for example: this processes the "a = 1" part of "LET a = 1" 
-            */
-            curr_tok = match(curr_tok, 4);
-            curr_tok = match(curr_tok, 17);
-            curr_tok = expression(curr_tok);
+        //     /* 
+        //     check for an identifer, equals sign, and expression
+        //     for example: this processes the "a = 1" part of "LET a = 1" 
+        //     */
+        //     curr_tok = match(curr_tok, 4);
+        //     curr_tok = match(curr_tok, 17);
+        //     curr_tok = expression(curr_tok);
 
-            final_code = append_line(final_code, ";\n");
-            break;
+        //     final_code = append_line(final_code, ";\n");
+        //     break;
         // INPUT ident nl
         case 9:
             //("STATEMENT -- INPUT\n");
@@ -239,29 +239,57 @@ struct Token *statement(struct Token *tokens) {
         Make LET optional for variables that have already been declared.
         ident "=" expression nl
         */
-        case 4:
-            // check whether this variable exists or not, if it doesn't we need to make it
-            if(isvariable(var_head, curr_tok->text) == 0) {
-                createvar(vars, curr_tok->text);
-                // decalring the new variable in our C code
-                final_code = append_line(final_code, "int ");
-                final_code = append_line(final_code, curr_tok->text);
-                final_code = append_line(final_code, ";\n");
-            }
-            // emit the var name for initlization/value assignment
-            final_code = append_line(final_code, curr_tok->text);
-            // move to the next token and make sure it's an equal sign
-            curr_tok = curr_tok->next;
-            curr_tok = match(curr_tok, 17);
+        // case 4:
+        //     // check whether this variable exists or not, if it doesn't we need to make it
+        //     if(isvariable(var_head, curr_tok->text) == 0) {
+        //         createvar(vars, curr_tok->text);
+        //         // decalring the new variable in our C code
+        //         final_code = append_line(final_code, "int ");
+        //         final_code = append_line(final_code, curr_tok->text);
+        //         final_code = append_line(final_code, ";\n");
+        //     }
+        //     // emit the var name for initlization/value assignment
+        //     final_code = append_line(final_code, curr_tok->text);
+        //     // move to the next token and make sure it's an equal sign
+        //     curr_tok = curr_tok->next;
+        //     curr_tok = match(curr_tok, 17);
 
-            // emit the equal's sign
-            final_code = append_line(final_code, " = ");
+        //     // emit the equal's sign
+        //     final_code = append_line(final_code, " = ");
             
-            // match the expression from the grammar rule and add newline and semi-colon chars
-            curr_tok = expression(curr_tok);
-            final_code = append_line(final_code, ";\n");
-            break;
+        //     // match the expression from the grammar rule and add newline and semi-colon chars
+        //     curr_tok = expression(curr_tok);
+        //     final_code = append_line(final_code, ";\n");
+        //     break;
         default:
+            if(curr_tok->type == 4 || curr_tok->type == 10) {
+
+                //check for the LET keyword, if it's there we have to move to the next token
+                if(curr_tok->type == 10)
+                    curr_tok = curr_tok->next;
+                
+                // check whether this variable exists or not, if it doesn't we need to make it
+                if(isvariable(var_head, curr_tok->text) == 0) {
+                    createvar(vars, curr_tok->text);
+                    // decalring the new variable in our C code
+                    final_code = append_line(final_code, "int ");
+                    final_code = append_line(final_code, curr_tok->text);
+                    final_code = append_line(final_code, ";\n");
+                }
+                // emit the var name for initlization/value assignment
+                final_code = append_line(final_code, curr_tok->text);
+                // move to the next token and make sure it's an equal sign
+                curr_tok = curr_tok->next;
+                curr_tok = match(curr_tok, 17);
+
+                // emit the equal's sign
+                final_code = append_line(final_code, " = ");
+                
+                // match the expression from the grammar rule and add newline and semi-colon chars
+                curr_tok = expression(curr_tok);
+                final_code = append_line(final_code, ";\n");
+                break;
+            }
             printf("INVALID TOKEN -- [%s]\n", curr_tok->text);
             exit(3);
     }
