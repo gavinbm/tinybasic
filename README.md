@@ -29,13 +29,13 @@ school isn't offering it so I'm putting on my big boy pants and teaching myself 
 
 # The Grammar and Features
 Here is the current grammar, it will most definitely change as I add features or change current ones. The notation is as follows:
- - ::= Refers to a definition of a rule; the rule will be on the left side and the definition on the right
- - |   Is a logical or
- - ()  Is just for grouping
- - []  Means zero or one of what's inside
- - {}  Means zero or more of what's inside
- - +   Means one or more of whatever is left of the +
- 
+ - ::=  Refers to a definition of a rule; the rule will be on the left side and the definition on the right
+ - |    Is a logical or
+ - ()   Is just for grouping
+ - []   Means zero or one of what's inside
+ - {}   Means zero or more of what's inside
+ - +    Means one or more of whatever is left of the +
+
 Keywords or operators, things that are always needed as constants, are written in double quotation marks
 
 Not every feature that you find in the grammar is implemented yet, as of right now the feature list below the grammar should be considered the final reference for what the language can do. I'm currently working on implementing arrays so any rule or part of any rule that deals with arrays should be ignored.
