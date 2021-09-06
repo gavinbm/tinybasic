@@ -86,7 +86,7 @@ struct Token *statement(struct Token *tokens) {
                         curr_tok = expression(curr_tok);
                         final_code = append_line(final_code, "));\n"); 
                     } else {
-                        final_code = append_line(final_code, "printf(\"%c\\n\", (int)(");
+                        final_code = append_line(final_code, "printf(\"%c\\n\", (char)(");
                         curr_tok = expression(curr_tok);
                         final_code = append_line(final_code, "));\n");
                     }
@@ -211,7 +211,7 @@ struct Token *statement(struct Token *tokens) {
                     scanf gives a bad exit code, this helps us avoid errors in the C code
                     and keep our INPUT functionality pretty simple for the user
                 */
-                final_code = append_line(final_code, "if(scanf(\" %c\", ");
+                final_code = append_line(final_code, "if(scanf(\" %c\", (char *)");
                 final_code = append_line(final_code, "&");
                 final_code = append_line(final_code, curr_tok->text);
                 final_code = append_line(final_code, ") == 0) {\n");
@@ -250,7 +250,7 @@ struct Token *statement(struct Token *tokens) {
                     scanf gives a bad exit code, this helps us avoid errors in the C code
                     and keep our INPUT functionality pretty simple for the user
                 */
-                final_code = append_line(final_code, "if(scanf(\"%d\", ");
+                final_code = append_line(final_code, "if(scanf(\"%d\", (int *)");
                 final_code = append_line(final_code, "&");
                 final_code = append_line(final_code, curr_tok->text);
                 final_code = append_line(final_code, ") == 0) {\n");
