@@ -10,10 +10,8 @@ and kill the program with an exit() call.
 */
 
 char *final_code;               // this string will be our final C code that gets written to the C file
-struct Variable *var = NULL;    // Our linked list of variables that will be filled as we parse
-struct Label *label = NULL;     // Out linked list of labels that will be filled as we parse
-struct Variable **vars = &var;  // A pointer to our variable list, this makes editing the list easier with double pointer tricks
-struct Label **labels = &label; // A pointer to our label list, once again, double pointer tricks are great
+struct Variable *vars = NULL;   // Our linked list of variables that will be filled as we parse
+struct Label *labels = NULL;    // Out linked list of labels that will be filled as we parse
 
 // first step to get us into the grammar so we can begin parsing
 void parse(struct Token *tokens) {
@@ -55,8 +53,8 @@ statement ::= "PRINT" (expression | string) nl
 */
 struct Token *statement(struct Token *tokens) {
     struct Token *curr_tok = tokens;
-    struct Variable *var_head = *vars, *var_t;
-    struct Label *label_head = *labels, *label_tmp;
+    struct Variable *var_t;
+    struct Label *label_tmp;
     char *tmp_code;
 
     switch(curr_tok->type) {
@@ -77,7 +75,7 @@ struct Token *statement(struct Token *tokens) {
                 free(tmp_code);
                 curr_tok = curr_tok->next;
             } else {
-                var_t = getvar(var_head, curr_tok->text);
+                var_t = getvar(vars, curr_tok->text);
 
                 if(var_t) {
                     
@@ -149,13 +147,13 @@ struct Token *statement(struct Token *tokens) {
             curr_tok = curr_tok->next;
             
             // check if the label has already been declared and throw an error if it has
-            if(islabel(label_head, curr_tok->text)) {
+            if(islabel(labels, curr_tok->text)) {
                 printf("LABEL ERROR: label [%s] already declared...\n", curr_tok->text);
                 exit(4);
             }
 
             // create the new label, adding it to our list and setting up the C code
-            createlabel(labels, curr_tok->text);
+            createlabel(&labels, curr_tok->text);
             final_code = append_line(final_code, curr_tok->text);
             final_code = append_line(final_code, ":\n");
             // LABEL must be followed by an identifier (which is the label name)
@@ -168,7 +166,7 @@ struct Token *statement(struct Token *tokens) {
 
             // check if the label has been visited, mark it as visited if it has been
             // throw an error if the label doesn't exist
-            if((label_tmp = getlabel(label_head, curr_tok->text)) != NULL) {
+            if((label_tmp = getlabel(labels, curr_tok->text)) != NULL) {
                 label_tmp->visited = 1;
             } else {
                 printf("GOTO ERROR: label [%s] does not exist...\n", curr_tok->text);
@@ -193,15 +191,15 @@ struct Token *statement(struct Token *tokens) {
 
                  // check for the variable (ident that follows the INPUT) in our var list
                 // if it's there, we just fill/overwrite its value, otherwise we need to make it
-                if(isvariable(var_head, curr_tok->text) == 0) {
-                    createvar(vars, curr_tok->text, 1);
+                if(isvariable(vars, curr_tok->text) == 0) {
+                    createvar(&vars, curr_tok->text, 1);
                     // decalring the new variable in our C code
                     final_code = append_line(final_code, "char ");
                     final_code = append_line(final_code, curr_tok->text);
                     final_code = append_line(final_code, ";\n");
                 } else {
                     // we have to make sure the var type is a char
-                    var_t = getvar(var_head, curr_tok->text);
+                    var_t = getvar(vars, curr_tok->text);
                     var_t->type = 1;
                 }
                 /* 
@@ -231,15 +229,15 @@ struct Token *statement(struct Token *tokens) {
 
                 // check for the variable (ident that follows the INPUT) in our var list
                 // if it's there, we just fill/overwrite its value, otherwise we need to make it
-                if(isvariable(var_head, curr_tok->text) == 0) {
-                    createvar(vars, curr_tok->text, 0);
+                if(isvariable(vars, curr_tok->text) == 0) {
+                    createvar(&vars, curr_tok->text, 0);
                     // decalring the new variable in our C code
                     final_code = append_line(final_code, "int ");
                     final_code = append_line(final_code, curr_tok->text);
                     final_code = append_line(final_code, ";\n");
                 } else {
                     // we have to make sure the var type is an int
-                    var_t = getvar(var_head, curr_tok->text);
+                    var_t = getvar(vars, curr_tok->text);
                     var_t->type = 0;
                 }
 
@@ -276,17 +274,17 @@ struct Token *statement(struct Token *tokens) {
                     curr_tok = curr_tok->next;
                 
                 // check whether this variable exists or not, if it doesn't we need to make it
-                if(isvariable(var_head, curr_tok->text) == 0) {
+                if(isvariable(vars, curr_tok->text) == 0) {
                     // check whether it's a char or int and assign the right type value
                     // if it's a char, we assign 1, if it's an int we assign 0
                     if(curr_tok->next->next->type == 28) {
-                        createvar(vars, curr_tok->text, 1);
+                        createvar(&vars, curr_tok->text, 1);
                         // decalring the new variable in our C code
                         final_code = append_line(final_code, "char ");
                         final_code = append_line(final_code, curr_tok->text);
                         final_code = append_line(final_code, ";\n");
                     } else {
-                        createvar(vars, curr_tok->text, 0);
+                        createvar(&vars, curr_tok->text, 0);
                         // decalring the new variable in our C code
                         final_code = append_line(final_code, "int ");
                         final_code = append_line(final_code, curr_tok->text);
@@ -294,7 +292,7 @@ struct Token *statement(struct Token *tokens) {
                     }
                 } else {
                     // if the variable doesn't exist, we have to make sure the type is correct
-                    var_t = getvar(var_head, curr_tok->text);
+                    var_t = getvar(vars, curr_tok->text);
                     
                     if(curr_tok->next->next->type == 28) {
                         var_t->type = 1;
@@ -400,7 +398,7 @@ struct Token *primary(struct Token *curr_token) {
             curr_token = curr_token->next;
             break;
         case 4:
-            if(isvariable(*vars, curr_token->text) == 0) {
+            if(isvariable(vars, curr_token->text) == 0) {
                 printf("PRIMARY ERROR: variable [%s] does not exist...\n", curr_token->text);
                 exit(5);
             }

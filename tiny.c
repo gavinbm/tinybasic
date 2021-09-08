@@ -12,8 +12,8 @@ int main(int argc, char **argv) {
         free(final_code);
 
         free_tokens(tokens);                // free the tokens
-        free_vars(var);                     // free the vars
-        free_labels(label);                 // free the labels
+        free_vars(vars);                     // free the vars
+        free_labels(labels);                 // free the labels
 
         fclose(read);                       // close the basic source file
     } else {

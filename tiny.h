@@ -43,8 +43,8 @@ struct Label {
 };
 
 /* ---- globals used in tiny.c and emitter.c ---- */
-extern struct Variable *var; // list of variables
-extern struct Label *label;  // list of labels
+extern struct Variable *vars; // list of variables
+extern struct Label *labels;  // list of labels
 extern char *final_code;     // the final code to be emitted
 
 /* ---- lexer.c ---- */
