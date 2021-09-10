@@ -1,6 +1,6 @@
 # Teeny Tiny Basic
 A C implementation of the Tiny BASIC compiler found in [this article](http://web.eecs.utk.edu/~azh/blog/teenytinycompiler1.html) and [this github repo](https://github.com/AZHenley/teenytinycompiler) by Dr. Austin Henley. I did pretty well in Automata last semester and was excited to take Compiler Design this Fall, but my
-school isn't offering it so I'm putting on my big boy pants and teaching myself how to write a compiler (with no memory leaks to boot!). The final goal is to compile to arm32 executables that can be run on a raspberry pi.
+school isn't offering it so I'm putting on my big boy pants and teaching myself how to write a compiler (with no memory leaks to boot!).
 
 # Building and Using
 |          Step            |                  Commands to run                           |
@@ -17,14 +17,11 @@ school isn't offering it so I'm putting on my big boy pants and teaching myself 
 - [x] Complete the lexer
 - [x] Complete the parser
 - [x] Complete the C emitter
-- [ ] Complete the ARM emitter
 - [x] Complete testing suite with sample programs
-- [ ] Add arrays and strings (strings will be char arrays like in C)
-  - [ ] Static allocation of arrays, no dynamic
-  - [ ] Access elements via indexing
-  - [x] Chars assined in the form ident = '(letter)' 
-- [ ] Add support for pointers 
+- [x] Support character variables
+- [ ] Write a 3 to 5 function stdlib
 - [ ] Write a REPL
+- [ ] Optimize the compiler via constant folding, hash tables, etc.
 - [ ] Use this to land a job, retire at 50, and spend my golden years fishing on Lake Superior
 
 # The Grammar and Features
