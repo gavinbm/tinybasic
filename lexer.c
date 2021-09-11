@@ -44,32 +44,16 @@ struct Token *lex(FILE *read) {
                     break;
                 // arithmetic signs are all standalone tokens and will be stored individually
                 case '+':
-                    substr = malloc(2 * sizeof(char));
-                    substr[0] = '+';
-                    substr[1] = '\0';
-                    createToken(&tokens, substr, 18);
-                    free(substr);
+                    makeshorttoken(curr_char, 18, tokens);
                     break;
                 case '-':
-                    substr = malloc(2 * sizeof(char));
-                    substr[0] = '-';
-                    substr[1] = '\0';
-                    createToken(&tokens, substr, 19);
-                    free(substr);
+                    makeshorttoken(curr_char, 19, tokens);
                     break;
                 case '*':
-                    substr = malloc(2 * sizeof(char));
-                    substr[0] = '*';
-                    substr[1] = '\0';
-                    createToken(&tokens, substr, 20);
-                    free(substr);
+                    makeshorttoken(curr_char, 20, tokens);
                     break;
                 case '/':
-                    substr = malloc(2 * sizeof(char));
-                    substr[0] = '/';
-                    substr[1] = '\0';
-                    createToken(&tokens, substr, 21);
-                    free(substr);
+                    makeshorttoken(curr_char, 21, tokens);
                     break;
                 /* now we have to check for two character tokens. Check the current
                  char and the next to decide which logical operation is happening. 
@@ -86,11 +70,7 @@ struct Token *lex(FILE *read) {
                         free(substr);
                         i++;
                     } else {
-                        substr = malloc(2 * sizeof(char));
-                        substr[0] = '=';
-                        substr[1] = '\0';
-                        createToken(&tokens, substr, 17);
-                        free(substr);
+                        makeshorttoken(curr_char, 17, tokens);
                     }
                     break;
                 case '<':
@@ -103,11 +83,7 @@ struct Token *lex(FILE *read) {
                         free(substr);
                         i++;
                     } else {
-                        substr = malloc(2 * sizeof(char));
-                        substr[0] = '<';
-                        substr[1] = '\0';
-                        createToken(&tokens, substr, 24);
-                        free(substr); 
+                        makeshorttoken(curr_char, 24, tokens);
                     }
                     break;
                 case '>':
@@ -120,11 +96,7 @@ struct Token *lex(FILE *read) {
                         free(substr);
                         i++;
                     } else {
-                        substr = malloc(2 * sizeof(char));
-                        substr[0] = '>';
-                        substr[1] = '\0';
-                        createToken(&tokens, substr, 26);
-                        free(substr);
+                        makeshorttoken(curr_char, 26, tokens);
                     }
                     break;
                 case '!':
@@ -281,4 +253,15 @@ int iskeyword(char *str) {
             return i + 1;
     }
     return 0;
+}
+
+/*
+    creates one letter long tokens, made this function to reduce code repetition
+*/
+void makeshorttoken(char letter, int type, struct Token *tokens) {
+    char *substr = malloc(2 * sizeof(char));
+    substr[0] = letter;
+    substr[1] = '\0';
+    createToken(&tokens, substr, type);
+    free(substr);
 }
