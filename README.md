@@ -44,14 +44,13 @@ statement ::= "PRINT" (expression | string) nl
             | "WHILE" comparison "REPEAT" nl {statement} "ENDWHILE" nl
             | "LABEL" ident nl
             | "GOTO" ident nl
-            | {"LET"} ident{[number]} "=" (expression | char | array) nl
+            | {"LET"} ident "=" (expression | char) nl
             | "GET" ("INT" | "CHAR") ident nl
 comparison ::= expression (("==" | "!=" | ">" | ">=" | "<" | "<=") expression)+
 expression ::= term {( "-" | "+" ) term}
 term       ::= unary {( "/" | "*" ) unary}
 unary      ::= ["+" | "-"] primary
-primary    ::= number | array | char | ident
-array      ::= [(number | char)]
+primary    ::= number | char | ident
 char       ::= '(A ... z)'
 nl         ::= '\n'+
 ```
