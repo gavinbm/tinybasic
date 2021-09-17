@@ -47,7 +47,7 @@ statement ::= "PRINT" (expression | string) nl
             | {"LET"} ident "=" (expression | char) nl
             | "GET" ("INT" | "CHAR") ident nl
 comparison ::= expression (("==" | "!=" | ">" | ">=" | "<" | "<=") expression)+
-expression ::= term {( "-" | "+" ) term}
+expression ::= {(} term {( "-" | "+" ) term} {)}
 term       ::= unary {( "/" | "*" ) unary}
 unary      ::= ["+" | "-"] primary
 primary    ::= number | char | ident
@@ -59,6 +59,7 @@ The language currently supports:
 - Numeric variables
 - Character variables
 - Basic arithmetic
+- Parentheses in arithmetic expressions
 - If statements
 - While loops
 - Print text and numbers

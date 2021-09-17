@@ -13,8 +13,8 @@
     STRING  = 5     LET      = 10   DIV   = 21
     CHAR    = 28    IF       = 11   EQEQ  = 22
     INT     = 29    THEN     = 12   NOTEQ = 23
-                    ENDIF    = 13   LT    = 24
-                    WHILE    = 14   LTEQ  = 25
+    (       = 30    ENDIF    = 13   LT    = 24
+    )       = 31    WHILE    = 14   LTEQ  = 25
                     REPEAT   = 15   GT    = 26
                     ENDWHILE = 16   GTEQ  = 27
 
@@ -22,6 +22,13 @@
     allowing us to decipher what kind of token we're looking at when
     we parse the tokens.
 */
+
+enum TokenType {
+    S, EOFC, NEWLINE, NUMBER, IDENT, STRING, LABEL, GOTO, PRINT,
+    GET, LET, IF, THEN, ENDIF, WHILE, REPEAT, ENDWHILE,
+    EQ, PLUS, MINUS, MUL, DIV, EQEQ, NOTEQ, LT, LTEQ,
+    GT, GTEQ, CHAR, INT, LEFTPAREN, RIGHTPAREN
+};
 
 struct Token {
     char *text;

@@ -24,7 +24,7 @@ character determing the text and type of each token. Returns a linked list of to
 */
 struct Token *lex(FILE *read) {
 
-    int curr_pos, key;
+    int curr_pos, paren_count = 0, key;
     char buffer[MAXLEN], test[2], *substr, curr_char;
     struct Token *tokens = NULL;
 
@@ -62,12 +62,7 @@ struct Token *lex(FILE *read) {
                 case '=':
                     if(buffer[i + 1] == '=') {
                         // giving the extra space so the full text can be stored in the token
-                        substr = malloc(3 * sizeof(char));
-                        substr[0] = buffer[i];
-                        substr[1] = buffer[i + 1];
-                        substr[2] = '\0';
-                        createToken(&tokens, substr, 22);
-                        free(substr);
+                        createToken(&tokens, "==", EQEQ);
                         i++;
                     } else {
                         makeshorttoken(curr_char, 17, tokens);
@@ -75,12 +70,7 @@ struct Token *lex(FILE *read) {
                     break;
                 case '<':
                     if(buffer[i + 1] == '=') {
-                        substr = malloc(3 * sizeof(char));
-                        substr[0] = buffer[i];
-                        substr[1] = buffer[i + 1];
-                        substr[2] = '\0';
-                        createToken(&tokens, substr, 25);
-                        free(substr);
+                        createToken(&tokens, "<=", LTEQ);
                         i++;
                     } else {
                         makeshorttoken(curr_char, 24, tokens);
@@ -88,12 +78,7 @@ struct Token *lex(FILE *read) {
                     break;
                 case '>':
                     if(buffer[i + 1] == '=') {
-                        substr = malloc(3 * sizeof(char));
-                        substr[0] = buffer[i];
-                        substr[1] = buffer[i + 1];
-                        substr[2] = '\0';
-                        createToken(&tokens, substr, 27);
-                        free(substr);
+                        createToken(&tokens, ">=", GTEQ);
                         i++;
                     } else {
                         makeshorttoken(curr_char, 26, tokens);
@@ -101,15 +86,12 @@ struct Token *lex(FILE *read) {
                     break;
                 case '!':
                     if(buffer[i + 1] == '=') {
-                        substr = malloc(3 * sizeof(char));
-                        substr[0] = buffer[i];
-                        substr[1] = buffer[i + 1];
-                        substr[2] = '\0';
-                        createToken(&tokens, substr, 23);
-                        free(substr);
+                        createToken(&tokens, "!=", NOTEQ);
                         i++;
-                    } else // we don't allow for just '!' to be a token, so it's an error
-                        printf("WRONG\n"); 
+                    } else {// we don't allow for just '!' to be a token, so it's an error
+                        printf("Singular \"!\" not supported...\n");
+                        exit(1);
+                    }
                     break;
                 /* Now we process strings, which are of the form
                  "text" where text can be any collection of characters.
@@ -129,7 +111,7 @@ struct Token *lex(FILE *read) {
                     substr = malloc((i - curr_pos + 1) * sizeof(char));
                     memcpy(substr, &buffer[curr_pos], i - curr_pos + 1);
                     substr[i - curr_pos] = '\0'; // set the null-terminator
-                    createToken(&tokens, substr, 5);
+                    createToken(&tokens, substr, STRING);
                     free(substr);
                     break;
                 // handle individual char's, these can be put in variables and must be 
@@ -139,17 +121,17 @@ struct Token *lex(FILE *read) {
                     substr = malloc(2 * sizeof(char));
                     substr[0] = buffer[i];
                     substr[1] = '\0';
-                    createToken(&tokens, substr, 28);
+                    createToken(&tokens, substr, CHAR);
                     free(substr);
                     i++;
                     break;
                 // handle new lines, these mark the end of a statement and are not tokenized
                 case '\n':
-                    createToken(&tokens, "\\n", 2);
+                    createToken(&tokens, "\\n", NEWLINE);
                     break;
                 // null-terminator, dictates the very end of a statement
                 case '\0':
-                    createToken(&tokens, "\\0", 1);
+                    createToken(&tokens, "\\0", EOFC);
                     break;
                 // handle comments, we don't even want to tokenize these to save memory
                 // all comments are single line and begin with a #
@@ -157,6 +139,14 @@ struct Token *lex(FILE *read) {
                 case '#':
                     while(buffer[i] != '\n')
                         i++;
+                    break;
+                case '(':
+                    paren_count++;
+                    createToken(&tokens, "(", LEFTPAREN);
+                    break;
+                case ')':
+                    paren_count--;
+                    createToken(&tokens, ")", RIGHTPAREN);
                     break;
                 // handle all other tokens, including keywords, variables, and numeric literals
                 default:
@@ -206,6 +196,12 @@ struct Token *lex(FILE *read) {
         }
     }
 
+    if(paren_count != 0) {
+        printf("unbalanced parentheses...\n");
+        exit(1);
+    }
+
+    createToken(&tokens, "\\n", 2);
     return tokens;
 }
 
