@@ -107,6 +107,7 @@ struct Token *statement(struct Token *tokens) {
                 curr_tok = comparison(curr_tok);
             }
             // we need to find a THEN (type 12) token and a newline after the comparison
+            printf("%s\n", curr_tok->text);
             curr_tok = match(curr_tok, THEN);
             curr_tok = nl(curr_tok);
 
@@ -263,7 +264,7 @@ struct Token *statement(struct Token *tokens) {
             }
 
             // look for the identifier after the CHAR | INT
-            curr_tok = match(curr_tok, 4);
+            curr_tok = match(curr_tok, IDENT);
             break;
         default:
             // {LET} ident = (expression | string) nl

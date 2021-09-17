@@ -18,22 +18,22 @@
 */
 int iscomparisonop(struct Token *curr_token) {
     switch(curr_token->type) {
-        case 22:
+        case EQEQ:
             return 22;
             break;
-        case 23:
+        case NOTEQ:
             return 23;
             break;
-        case 24:
+        case LT:
             return 24;
             break;
-        case 25:
+        case LTEQ:
             return 25;
             break;
-        case 26:
+        case GT:
             return 26;
             break;
-        case 27:
+        case GTEQ:
             return 27;
             break;
         default:

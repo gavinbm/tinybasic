@@ -17,7 +17,13 @@
     )       = 31    WHILE    = 14   LTEQ  = 25
                     REPEAT   = 15   GT    = 26
                     ENDWHILE = 16   GTEQ  = 27
-                                    MOD   = 32
+                    OPEN     = 33   MOD   = 32
+                    CLOSE    = 34
+                    READ     = 35
+                    FROM     = 36
+                    WRITE    = 37
+                    INTO     = 38
+                    
 
     These will be assigned to each token as we lex the BASIC file
     allowing us to decipher what kind of token we're looking at when
@@ -25,10 +31,11 @@
 */
 
 enum TokenType {
-    S, EOFC, NEWLINE, NUMBER, IDENT, STRING, LABEL, GOTO, PRINT,
+    EOFC, NEWLINE, NUMBER, IDENT, STRING, LABEL, GOTO, PRINT,
     GET, LET, IF, THEN, ENDIF, WHILE, REPEAT, ENDWHILE,
     EQ, PLUS, MINUS, MUL, DIV, EQEQ, NOTEQ, LT, LTEQ,
-    GT, GTEQ, CHAR, INT, LEFTPAREN, RIGHTPAREN, MOD
+    GT, GTEQ, CHAR, INT, LEFTPAREN, RIGHTPAREN, MOD, OPEN, CLOSE,
+    READ, FROM, WRITE, INTO
 };
 
 struct Token {
@@ -53,7 +60,9 @@ struct Label {
 /* ---- globals used in tiny.c and emitter.c ---- */
 extern struct Variable *vars; // list of variables
 extern struct Label *labels;  // list of labels
-extern char *final_code;     // the final code to be emitted
+extern char *final_code;      // the final code to be emitted
+extern char *header_code;     // top part of code, holds var decs
+extern char *footer_code;     // bottom part, holds actual logic  
 
 /* ---- lexer.c ---- */
 struct Token *lex(FILE *read);

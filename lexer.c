@@ -91,7 +91,7 @@ struct Token *lex(FILE *read) {
                         createToken(&tokens, "!=", NOTEQ);
                         i++;
                     } else {// we don't allow for just '!' to be a token, so it's an error
-                        printf("Singular \"!\" not supported...\n");
+                        printf("Singular \"!\" not supported, must be \"!=\"...\n");
                         exit(1);
                     }
                     break;
@@ -166,7 +166,7 @@ struct Token *lex(FILE *read) {
                         if(key) {
                             createToken(&tokens, substr, key);
                         } else {
-                            createToken(&tokens, substr, 4);
+                            createToken(&tokens, substr, IDENT);
                         }
                         free(substr);
                         i--;
@@ -187,7 +187,7 @@ struct Token *lex(FILE *read) {
                             substr = malloc((i - curr_pos + 1) * sizeof(char));
                             memcpy(substr, &buffer[curr_pos], i - curr_pos + 1);
                             substr[i - curr_pos] = '\0'; // set the null-terminator
-                            createToken(&tokens, substr, 3);
+                            createToken(&tokens, substr, NUMBER);
                             free(substr);
                             i--;
                     } else {
@@ -203,7 +203,7 @@ struct Token *lex(FILE *read) {
         exit(1);
     }
 
-    createToken(&tokens, "\\n", 2);
+    createToken(&tokens, "\\n", NEWLINE);
     return tokens;
 }
 
@@ -234,7 +234,7 @@ Sets up an array of all our possible token types and checks the given string to 
 the token type.
 */
 int iskeyword(char *str) {
-    char keywords[29][9] = {
+    char keywords[38][10] = {
         "EOF", "NEWLINE", "NUMBER",
         "IDENT", "STRING", "LABEL",
         "GOTO", "PRINT", "GET",
@@ -244,11 +244,13 @@ int iskeyword(char *str) {
         "MINUS", "MUL", "DIV",
         "EQEQ", "NOTEQ", "LT",
         "LTEQ", "GT", "GTEQ",
-        "CHAR", "INT"};
+        "CHAR", "INT", "LEFTPAREN", "RIGHTPAREN",
+        "MOD", "OPEN", "CLOSE", "READ",
+        "FROM", "WRITE", "INTO"};
     
-    for(int i = 0; i < 29; ++i) {
+    for(int i = 0; i < 38; ++i) {
         if(strcmp(str, keywords[i]) == 0)
-            return i + 1;
+            return i;
     }
     return 0;
 }

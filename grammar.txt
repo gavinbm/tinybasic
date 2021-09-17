@@ -6,6 +6,10 @@ statement ::= "PRINT" (expression | string) nl
             | "GOTO" ident nl
             | {"LET"} ident "=" (expression | char) nl
             | "GET" ("INT" | "CHAR") ident nl
+            | "OPEN" string nl
+            | "CLOSE" string nl
+            | "READ" (ident | number) FROM (string) INTO (ident) nl
+            | "WRITE" (string) INTO (string) nl
 comparison ::= expression (("==" | "!=" | ">" | ">=" | "<" | "<=") expression)+
 expression ::= {(} term {( "-" | "+" ) term} {)}
 term       ::= unary {( "/" | "*" ) unary}
@@ -13,3 +17,8 @@ unary      ::= ["+" | "-"] primary
 primary    ::= number | char | ident
 char       ::= '(A ... z)'
 nl         ::= '\n'+
+
+OPEN "file.c"                   -> FILE *fp = fopen("file.c", "w+");
+CLOSE "file.c"                  -> fclose("file.c);
+READ 64 FROM "file.c" INTO file -> fgets(file, 64, file.c);
+WRITE "hello" INTO "file.c"     -> fputs("hello", file.c);
