@@ -59,7 +59,6 @@ extern char *final_code;     // the final code to be emitted
 struct Token *lex(FILE *read);
 void createToken(struct Token **head, char *source, int type);
 int iskeyword(char *str);
-void makeshorttoken(char letter, int type, struct Token *tokens);
 
 /* ---- parser.c ---- */
 void parse(struct Token *curr_token);

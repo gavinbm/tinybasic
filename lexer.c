@@ -68,7 +68,7 @@ struct Token *lex(FILE *read) {
                         createToken(&tokens, "==", EQEQ);
                         i++;
                     } else {
-                        makeshorttoken(curr_char, 17, tokens);
+                        createToken(&tokens, "=", EQ);
                     }
                     break;
                 case '<':
@@ -76,7 +76,7 @@ struct Token *lex(FILE *read) {
                         createToken(&tokens, "<=", LTEQ);
                         i++;
                     } else {
-                        makeshorttoken(curr_char, 24, tokens);
+                        createToken(&tokens, "<", LT);
                     }
                     break;
                 case '>':
@@ -84,7 +84,7 @@ struct Token *lex(FILE *read) {
                         createToken(&tokens, ">=", GTEQ);
                         i++;
                     } else {
-                        makeshorttoken(curr_char, 26, tokens);
+                        createToken(&tokens, ">", GT);
                     }
                     break;
                 case '!':
@@ -252,15 +252,4 @@ int iskeyword(char *str) {
             return i + 1;
     }
     return 0;
-}
-
-/*
-    creates one letter long tokens, made this function to reduce code repetition
-*/
-void makeshorttoken(char letter, int type, struct Token *tokens) {
-    char *substr = malloc(2 * sizeof(char));
-    substr[0] = letter;
-    substr[1] = '\0';
-    createToken(&tokens, substr, type);
-    free(substr);
 }
