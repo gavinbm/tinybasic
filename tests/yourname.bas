@@ -1,4 +1,3 @@
-
 PRINT "How long is your name?"
 GET INT len
 LET count = 0

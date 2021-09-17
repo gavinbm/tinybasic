@@ -10,6 +10,8 @@ and kill the program with an exit() call.
 */
 
 char *final_code;               // this string will be our final C code that gets written to the C file
+char *header_code;
+char *footer_code;
 struct Variable *vars = NULL;   // Our linked list of variables that will be filled as we parse
 struct Label *labels = NULL;    // Out linked list of labels that will be filled as we parse
 
@@ -26,8 +28,10 @@ void program(struct Token *tokens) {
     struct Token *tmp_tok = tokens;
 
     // allocate and initialize our C code
-    final_code = malloc(54 * sizeof(char));
-    memcpy(final_code, "#include <stdio.h>\nint main(int argc, char **argv) {\n", 54);
+    header_code = malloc(37 * sizeof(char));
+    footer_code = malloc(sizeof(char));
+    final_code = malloc(sizeof(char));
+    memcpy(header_code, "#include <stdio.h>\nint main(void) {\n", 37);
 
     // skip leading white space/newline characters
     while(tmp_tok->type == NEWLINE)
@@ -39,7 +43,10 @@ void program(struct Token *tokens) {
     }
 
     // set the return 0 and ending of our C code
-    final_code = append_line(final_code, "return 0;\n}");
+    footer_code = append_line(footer_code, "return 0;\n}");
+    // put the code together
+    final_code = append_line(final_code, header_code);
+    final_code = append_line(final_code, footer_code);
 }
 
 /*
@@ -71,7 +78,7 @@ struct Token *statement(struct Token *tokens) {
                 strcpy(tmp_code, "printf(\"");
                 memcpy(tmp_code + 8, curr_tok->text, curr_tok->len);
                 strcpy(tmp_code + curr_tok->len + 8, "\\n\");\n");
-                final_code = append_line(final_code, tmp_code);
+                footer_code = append_line(footer_code, tmp_code);
                 free(tmp_code);
                 curr_tok = curr_tok->next;
             } else {
@@ -80,13 +87,13 @@ struct Token *statement(struct Token *tokens) {
                 if(var_t) {
                     
                     if(var_t->type == 0) {
-                        final_code = append_line(final_code, "printf(\"%d\\n\", (int)(");
+                        footer_code = append_line(footer_code, "printf(\"%d\\n\", (int)(");
                         curr_tok = expression(curr_tok);
-                        final_code = append_line(final_code, "));\n"); 
+                        footer_code = append_line(footer_code, "));\n"); 
                     } else {
-                        final_code = append_line(final_code, "printf(\"%c\\n\", (char)(");
+                        footer_code = append_line(footer_code, "printf(\"%c\\n\", (char)(");
                         curr_tok = expression(curr_tok);
-                        final_code = append_line(final_code, "));\n");
+                        footer_code = append_line(footer_code, "));\n");
                     }
                 }
             }
@@ -97,11 +104,11 @@ struct Token *statement(struct Token *tokens) {
             curr_tok = curr_tok->next;
 
             // start the if statement and process the comparison
-            final_code = append_line(final_code, "if(");
+            footer_code = append_line(footer_code, "if(");
 
             // check whether if it's an ident or a comparison
             if(curr_tok->type == IDENT && !iscomparisonop(curr_tok->next)) {
-                final_code = append_line(final_code, curr_tok->text);
+                footer_code = append_line(footer_code, curr_tok->text);
                 curr_tok = curr_tok->next;
             } else {
                 curr_tok = comparison(curr_tok);
@@ -112,13 +119,13 @@ struct Token *statement(struct Token *tokens) {
             curr_tok = nl(curr_tok);
 
             // close the if statement, process the statements within the body of the if
-            final_code = append_line(final_code, ") {\n");
+            footer_code = append_line(footer_code, ") {\n");
             while(curr_tok->type != ENDIF)
                 curr_tok = statement(curr_tok);
             
             // look for the ENDIF (type 13) token and close the if statement body
             curr_tok = match(curr_tok, ENDIF);
-            final_code = append_line(final_code, "\n}\n");
+            footer_code = append_line(footer_code, "\n}\n");
             break;
         // WHILE comparison REPEAT {statement} nl ENDWHILE
         case WHILE:
@@ -126,7 +133,7 @@ struct Token *statement(struct Token *tokens) {
             curr_tok = curr_tok->next;
 
             // begin the while statement and look for the comparison
-            final_code = append_line(final_code, "while(");
+            footer_code = append_line(footer_code, "while(");
             curr_tok = comparison(curr_tok);
 
             // we need a REPEAT (type 15) token and a newline after the WHILE
@@ -134,13 +141,13 @@ struct Token *statement(struct Token *tokens) {
             curr_tok = nl(curr_tok);
 
             // close the while statement and process the body of it
-            final_code = append_line(final_code, ") {\n");
+            footer_code = append_line(footer_code, ") {\n");
             while(curr_tok->type != ENDWHILE)
                 curr_tok = statement(curr_tok);
             
             // find the ENDWHILE (type 16) token and close the body of the while loop
             curr_tok = match(curr_tok, ENDWHILE);
-            final_code = append_line(final_code, "\n}\n");
+            footer_code = append_line(footer_code, "\n}\n");
             break;
         // LABEL ident nl
         case LABEL:
@@ -155,8 +162,8 @@ struct Token *statement(struct Token *tokens) {
 
             // create the new label, adding it to our list and setting up the C code
             createlabel(&labels, curr_tok->text);
-            final_code = append_line(final_code, curr_tok->text);
-            final_code = append_line(final_code, ":\n");
+            footer_code = append_line(footer_code, curr_tok->text);
+            footer_code = append_line(footer_code, ":\n");
             // LABEL must be followed by an identifier (which is the label name)
             curr_tok = match(curr_tok, IDENT);
             break;
@@ -175,9 +182,9 @@ struct Token *statement(struct Token *tokens) {
             }
 
             // setup the goto statement, look for the identifier (label name) after the GOTO
-            final_code = append_line(final_code, "goto ");
-            final_code = append_line(final_code, curr_tok->text);
-            final_code = append_line(final_code, ";\n");
+            footer_code = append_line(footer_code, "goto ");
+            footer_code = append_line(footer_code, curr_tok->text);
+            footer_code = append_line(footer_code, ";\n");
             curr_tok = match(curr_tok, IDENT);
             break;
         // GET (CHAR | INT) ident nl
@@ -195,9 +202,9 @@ struct Token *statement(struct Token *tokens) {
                 if(isvariable(vars, curr_tok->text) == 0) {
                     createvar(&vars, curr_tok->text, 1);
                     // decalring the new variable in our C code
-                    final_code = append_line(final_code, "char ");
-                    final_code = append_line(final_code, curr_tok->text);
-                    final_code = append_line(final_code, ";\n");
+                    header_code = append_line(header_code, "char ");
+                    header_code = append_line(header_code, curr_tok->text);
+                    header_code = append_line(header_code, ";\n");
                 } else {
                     // we have to make sure the var type is a char
                     var_t = getvar(vars, curr_tok->text);
@@ -210,13 +217,13 @@ struct Token *statement(struct Token *tokens) {
                     scanf gives a bad exit code, this helps us avoid errors in the C code
                     and keep our INPUT functionality pretty simple for the user
                 */
-                final_code = append_line(final_code, "if(scanf(\" %c\", (char *)");
-                final_code = append_line(final_code, "&");
-                final_code = append_line(final_code, curr_tok->text);
-                final_code = append_line(final_code, ") == 0) {\n");
-                final_code = append_line(final_code, curr_tok->text);
-                final_code = append_line(final_code, " = 0;\n");
-                final_code = append_line(final_code, "scanf(\"%*s\");\n}\n");
+                footer_code = append_line(footer_code, "if(scanf(\" %c\", (char *)");
+                footer_code = append_line(footer_code, "&");
+                footer_code = append_line(footer_code, curr_tok->text);
+                footer_code = append_line(footer_code, ") == 0) {\n");
+                footer_code = append_line(footer_code, curr_tok->text);
+                footer_code = append_line(footer_code, " = 0;\n");
+                footer_code = append_line(footer_code, "scanf(\"%*s\");\n}\n");
                 // final_code = append_line(final_code, "if((");
                 // final_code = append_line(final_code, curr_tok->text);
                 // final_code = append_line(final_code, " = getchar()) == EOF) {\n");
@@ -233,9 +240,9 @@ struct Token *statement(struct Token *tokens) {
                 if(isvariable(vars, curr_tok->text) == 0) {
                     createvar(&vars, curr_tok->text, 0);
                     // decalring the new variable in our C code
-                    final_code = append_line(final_code, "int ");
-                    final_code = append_line(final_code, curr_tok->text);
-                    final_code = append_line(final_code, ";\n");
+                    header_code = append_line(header_code, "int ");
+                    header_code = append_line(header_code, curr_tok->text);
+                    header_code = append_line(header_code, ";\n");
                 } else {
                     // we have to make sure the var type is an int
                     var_t = getvar(vars, curr_tok->text);
@@ -249,13 +256,13 @@ struct Token *statement(struct Token *tokens) {
                     scanf gives a bad exit code, this helps us avoid errors in the C code
                     and keep our INPUT functionality pretty simple for the user
                 */
-                final_code = append_line(final_code, "if(scanf(\"%d\", (int *)");
-                final_code = append_line(final_code, "&");
-                final_code = append_line(final_code, curr_tok->text);
-                final_code = append_line(final_code, ") == 0) {\n");
-                final_code = append_line(final_code, curr_tok->text);
-                final_code = append_line(final_code, " = 0;\n");
-                final_code = append_line(final_code, "scanf(\"%*s\");\n}\n");
+                footer_code = append_line(footer_code, "if(scanf(\"%d\", (int *)");
+                footer_code = append_line(footer_code, "&");
+                footer_code = append_line(footer_code, curr_tok->text);
+                footer_code = append_line(footer_code, ") == 0) {\n");
+                footer_code = append_line(footer_code, curr_tok->text);
+                footer_code = append_line(footer_code, " = 0;\n");
+                footer_code = append_line(footer_code, "scanf(\"%*s\");\n}\n");
             } 
             // Unrecognized keyword
             else {
@@ -265,6 +272,18 @@ struct Token *statement(struct Token *tokens) {
 
             // look for the identifier after the CHAR | INT
             curr_tok = match(curr_tok, IDENT);
+            break;
+        // OPEN string AS ident nl
+        case OPEN:
+            break;
+        // CLOSE ident nl
+        case CLOSE:
+            break;
+        // READ (ident | number) FROM string INTO ident nl
+        case READ:
+            break;
+        // WRITE string INTO ident nl
+        case WRITE:
             break;
         default:
             // {LET} ident = (expression | string) nl
@@ -281,15 +300,15 @@ struct Token *statement(struct Token *tokens) {
                     if(curr_tok->next->next->type == CHAR) {
                         createvar(&vars, curr_tok->text, 1);
                         // decalring the new variable in our C code
-                        final_code = append_line(final_code, "char ");
-                        final_code = append_line(final_code, curr_tok->text);
-                        final_code = append_line(final_code, ";\n");
+                        header_code = append_line(header_code, "char ");
+                        header_code = append_line(header_code, curr_tok->text);
+                        header_code = append_line(header_code, ";\n");
                     } else {
                         createvar(&vars, curr_tok->text, 0);
                         // decalring the new variable in our C code
-                        final_code = append_line(final_code, "int ");
-                        final_code = append_line(final_code, curr_tok->text);
-                        final_code = append_line(final_code, ";\n");
+                        header_code = append_line(header_code, "int ");
+                        header_code = append_line(header_code, curr_tok->text);
+                        header_code = append_line(header_code, ";\n");
                     }
                 } else {
                     // if the variable doesn't exist, we have to make sure the type is correct
@@ -302,21 +321,21 @@ struct Token *statement(struct Token *tokens) {
                     }
                 }
                 // emit the var name for initlization/value assignment
-                final_code = append_line(final_code, curr_tok->text);
+                footer_code = append_line(footer_code, curr_tok->text);
                 // move to the next token and make sure it's an equal sign
                 curr_tok = curr_tok->next;
                 curr_tok = match(curr_tok, EQ);
 
                 // emit the equal's sign
-                final_code = append_line(final_code, " = ");
+                footer_code = append_line(footer_code, " = ");
                 
                 // match the expression from the grammar rule and add newline and semi-colon chars
                 curr_tok = expression(curr_tok);
                 while(curr_tok->type == RIGHTPAREN) {
-                    final_code = append_line(final_code, ")");
+                    footer_code = append_line(footer_code, ")");
                     curr_tok = curr_tok->next;
                 }
-                final_code = append_line(final_code, ";\n");
+                footer_code = append_line(footer_code, ";\n");
                 break;
             }
             printf("INVALID TOKEN -- [%s]\n", curr_tok->text);
@@ -335,7 +354,7 @@ struct Token *comparison(struct Token *curr_token) {
     curr_token = expression(curr_token);
 
     if(iscomparisonop(curr_token)) {
-        final_code = append_line(final_code, curr_token->text);
+        footer_code = append_line(footer_code, curr_token->text);
         curr_token = curr_token->next;
         curr_token = expression(curr_token);
     } else {
@@ -344,7 +363,7 @@ struct Token *comparison(struct Token *curr_token) {
     }
 
     while(iscomparisonop(curr_token)) {
-        final_code = append_line(final_code, curr_token->text);
+        footer_code = append_line(footer_code, curr_token->text);
         curr_token = curr_token->next;
         curr_token = expression(curr_token);
     }
@@ -356,14 +375,14 @@ struct Token *comparison(struct Token *curr_token) {
 struct Token *expression(struct Token *curr_token) {
     //printf("EXPRESSION -- [%s]\n", curr_token->text);
     while(curr_token->type == LEFTPAREN) {
-        final_code = append_line(final_code, "(");
+        footer_code = append_line(footer_code, "(");
         curr_token = curr_token->next;
     }
     
     curr_token = term(curr_token);
    
     while(curr_token->type == PLUS || curr_token->type == MINUS) {
-        final_code = append_line(final_code, curr_token->text);
+        footer_code = append_line(footer_code, curr_token->text);
         curr_token = term(curr_token->next);
     }
    
@@ -375,14 +394,14 @@ struct Token *term(struct Token *curr_token) {
     //printf("TERM\n");
    
       while(curr_token->type == LEFTPAREN) {
-        final_code = append_line(final_code, "(");
+        footer_code = append_line(footer_code, "(");
         curr_token = curr_token->next;
     }
 
     curr_token = unary(curr_token);
 
     while(curr_token->type == MUL || curr_token->type == DIV) {
-        final_code = append_line(final_code, curr_token->text);
+        footer_code = append_line(footer_code, curr_token->text);
         curr_token = unary(curr_token->next);
     }
     return curr_token;
@@ -393,12 +412,12 @@ struct Token *unary(struct Token *curr_token) {
     //printf("UNARY\n");
 
     if(curr_token->type == PLUS || curr_token->type == MINUS) {
-        final_code = append_line(final_code, curr_token->text);
+        footer_code = append_line(footer_code, curr_token->text);
         curr_token = curr_token->next;
     }
   
        while(curr_token->type == LEFTPAREN) {
-        final_code = append_line(final_code, "(");
+        footer_code = append_line(footer_code, "(");
         curr_token = curr_token->next;
     }
 
@@ -412,7 +431,7 @@ struct Token *primary(struct Token *curr_token) {
     //printf("PRIMARY -- [%s]\n", curr_token->text);
     switch(curr_token->type) {
         case NUMBER:
-            final_code = append_line(final_code, curr_token->text);
+            footer_code = append_line(footer_code, curr_token->text);
             curr_token = curr_token->next;
             break;
         case IDENT:
@@ -421,13 +440,13 @@ struct Token *primary(struct Token *curr_token) {
                 exit(5);
             }
             
-            final_code = append_line(final_code, curr_token->text);
+            footer_code = append_line(footer_code, curr_token->text);
             curr_token = curr_token->next;
             break;
         case CHAR:
-            final_code = append_line(final_code, "\'");
-            final_code = append_line(final_code, curr_token->text);
-            final_code = append_line(final_code, "\'");
+            footer_code = append_line(footer_code, "\'");
+            footer_code = append_line(footer_code, curr_token->text);
+            footer_code = append_line(footer_code, "\'");
             curr_token = curr_token->next;
             break;
         default:
@@ -442,9 +461,9 @@ struct Token *primary(struct Token *curr_token) {
 // char ::= '(A ... z)'
 struct Token *character(struct Token *curr_token) {
     if(curr_token->type == CHAR) {
-        final_code = append_line(final_code, "\'");
-        final_code = append_line(final_code, curr_token->text);
-        final_code = append_line(final_code, "\'");
+        footer_code = append_line(footer_code, "\'");
+        footer_code = append_line(footer_code, curr_token->text);
+        footer_code = append_line(footer_code, "\'");
     } else {
         printf("CHAR ERROR -- Expected type 28 but got %d...", curr_token->type);
         exit(9);

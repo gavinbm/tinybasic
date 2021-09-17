@@ -6,10 +6,10 @@ statement ::= "PRINT" (expression | string) nl
             | "GOTO" ident nl
             | {"LET"} ident "=" (expression | char) nl
             | "GET" ("INT" | "CHAR") ident nl
-            | "OPEN" string nl
-            | "CLOSE" string nl
+            | "OPEN" string AS ident nl
+            | "CLOSE" ident nl
             | "READ" (ident | number) FROM (string) INTO (ident) nl
-            | "WRITE" (string) INTO (string) nl
+            | "WRITE" (string) INTO (ident) nl
 comparison ::= expression (("==" | "!=" | ">" | ">=" | "<" | "<=") expression)+
 expression ::= {(} term {( "-" | "+" ) term} {)}
 term       ::= unary {( "/" | "*" ) unary}
