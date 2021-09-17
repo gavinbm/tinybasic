@@ -2,20 +2,19 @@
 
 /*          ---- Token Type Map ----
     Specials        Keywords        Operators
+    Specials        Keywords        Operators
     EOF     = 1     LABEL    = 6    EQ    = 17
     NEWLINE = 2     GOTO     = 7    PLUS  = 18
     NUMBER  = 3     PRINT    = 8    MINUS = 19
-    IDENT   = 4     INPUT    = 9    MUL   = 20
+    IDENT   = 4     GET      = 9    MUL   = 20
     STRING  = 5     LET      = 10   DIV   = 21
-                    IF       = 11   EQEQ  = 22
-                    THEN     = 12   NOTEQ = 23
-                    ENDIF    = 13   LT    = 24
-                    WHILE    = 14   LTEQ  = 25
+    CHAR    = 28    IF       = 11   EQEQ  = 22
+    INT     = 29    THEN     = 12   NOTEQ = 23
+    (       = 30    ENDIF    = 13   LT    = 24
+    )       = 31    WHILE    = 14   LTEQ  = 25
                     REPEAT   = 15   GT    = 26
                     ENDWHILE = 16   GTEQ  = 27
-                    READ     = 28
-                    WRITE    = 29
-                    INTO     = 30
+                                    MOD   = 32
 */
 
 /*
