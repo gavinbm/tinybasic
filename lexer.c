@@ -44,16 +44,19 @@ struct Token *lex(FILE *read) {
                     break;
                 // arithmetic signs are all standalone tokens and will be stored individually
                 case '+':
-                    makeshorttoken(curr_char, 18, tokens);
+                    createToken(&tokens, "+", PLUS);
                     break;
                 case '-':
-                    makeshorttoken(curr_char, 19, tokens);
+                    createToken(&tokens, "-", MINUS);
                     break;
                 case '*':
-                    makeshorttoken(curr_char, 20, tokens);
+                    createToken(&tokens, "*", MUL);
                     break;
                 case '/':
-                    makeshorttoken(curr_char, 21, tokens);
+                    createToken(&tokens, "/", DIV);
+                    break;
+                case '%':
+                    createToken(&tokens, "%%", MOD);
                     break;
                 /* now we have to check for two character tokens. Check the current
                  char and the next to decide which logical operation is happening. 

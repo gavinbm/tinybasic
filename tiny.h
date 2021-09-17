@@ -17,6 +17,7 @@
     )       = 31    WHILE    = 14   LTEQ  = 25
                     REPEAT   = 15   GT    = 26
                     ENDWHILE = 16   GTEQ  = 27
+                                    MOD   = 32
 
     These will be assigned to each token as we lex the BASIC file
     allowing us to decipher what kind of token we're looking at when
@@ -27,7 +28,7 @@ enum TokenType {
     S, EOFC, NEWLINE, NUMBER, IDENT, STRING, LABEL, GOTO, PRINT,
     GET, LET, IF, THEN, ENDIF, WHILE, REPEAT, ENDWHILE,
     EQ, PLUS, MINUS, MUL, DIV, EQEQ, NOTEQ, LT, LTEQ,
-    GT, GTEQ, CHAR, INT, LEFTPAREN, RIGHTPAREN
+    GT, GTEQ, CHAR, INT, LEFTPAREN, RIGHTPAREN, MOD
 };
 
 struct Token {

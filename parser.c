@@ -66,7 +66,7 @@ struct Token *statement(struct Token *tokens) {
             if we're printing a string, we set up a printf for the string
             and otherwise we have to set up a printf for a variable (only number vars) 
             */
-            if(curr_tok->type == 5) {
+            if(curr_tok->type == STRING) {
                 tmp_code = malloc((curr_tok->len + 15) * sizeof(char));
                 strcpy(tmp_code, "printf(\"");
                 memcpy(tmp_code + 8, curr_tok->text, curr_tok->len);
