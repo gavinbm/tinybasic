@@ -88,6 +88,8 @@ int write_file(char *filename, char *code);
 char *append_line(char *curr_code, char *new_code);
 
 /* ---- util.c ----- */
+void declare(struct Token *curr_tok, int type);
+
 int iscomparisonop(struct Token *curr_token);
 int islabel(struct Label *labels, char *name);
 int isvariable(struct Variable *vars, char *name);

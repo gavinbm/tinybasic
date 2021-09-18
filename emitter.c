@@ -26,7 +26,8 @@ malloc's needed to do so and will work provided that curr_code has been malloc'd
 returns a pointer to a new string.
 */
 char *append_line(char *curr_code, char *new_code) {
-    int curr_len = strlen(curr_code), added_len = strlen(new_code);
+    int curr_len = strlen(curr_code);
+    int added_len = strlen(new_code);
 
     char *full_code = malloc((curr_len + added_len + 1) * sizeof(char));
     memcpy(full_code, curr_code, curr_len);
