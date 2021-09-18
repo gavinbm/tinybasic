@@ -62,7 +62,7 @@ struct Token *statement(struct Token *tokens) {
     struct Token *curr_tok = tokens;
     struct Variable *var_t;
     struct Label *label_tmp;
-    char *tmp_code;
+    char *tmp_code, *tmp_code2, *tmp_code3;
 
     switch(curr_tok->type) {
         // PRINT expression | string nl
@@ -275,13 +275,17 @@ struct Token *statement(struct Token *tokens) {
             break;
         // OPEN string AS ident nl
         case OPEN:
+            // move onto the string
             curr_tok = curr_tok->next;
 
-            tmp_code = malloc((strlen(curr_tok->text) + 1) * sizeof(char));
+            // store the string into memory since we'll need it later to
+            // open the file
+            tmp_code = malloc((curr_tok->len + 1) * sizeof(char));
             strcpy(tmp_code, curr_tok->text);
-            //curr_tok = match(curr_tok, STRING);
-            curr_tok = curr_tok->next;
             
+            // make sure we have a string token here
+            curr_tok = match(curr_tok, STRING);
+            // maksing sure we've got the AS keyword
             curr_tok = match(curr_tok, AS);
 
             // if it's a variable we're gonna throw an error becaue of potential
@@ -307,8 +311,10 @@ struct Token *statement(struct Token *tokens) {
             break;
         // CLOSE ident nl
         case CLOSE:
+            // move to the ident
             curr_tok = curr_tok->next;
 
+            // make sure we're closing an existing file pointer
             if(isvariable(vars, curr_tok->text) == 3) {
                 footer_code = append_line(footer_code, "fclose(");
                 footer_code = append_line(footer_code, curr_tok->text);
@@ -318,10 +324,68 @@ struct Token *statement(struct Token *tokens) {
                 exit(11);
             }
 
+            // make sure we have an ident and not a keyword
             curr_tok = match(curr_tok, IDENT);
             break;
-        // READ (ident | number) FROM string INTO ident nl
+        // READ (ident | number) FROM ident INTO ident nl
         case READ:
+            // move onto the (ident | number)
+            curr_tok = curr_tok->next;
+
+            // if it's an integer variable or a number, it's valid
+            if(isvariable(vars, curr_tok->text) == 0 || curr_tok->type == NUMBER) {
+                footer_code = append_line(footer_code, "fgets(");
+                // store the number of bytes we need to read from fgets
+                tmp_code = malloc((curr_tok->len + 1) * sizeof(char));
+                strcpy(tmp_code, curr_tok->text);
+                curr_tok = curr_tok->next;
+            } else {
+                printf("READ ERROR: Invalid number of bytes to read...\n");
+                exit(12);
+            }
+
+            // check for the FROM keyword
+            curr_tok = match(curr_tok, FROM);
+
+            // check for a valid file pointer or string, throw an error if its not
+            if(isvariable(vars, curr_tok->text) == 3 || curr_tok->type == STRING) {
+                // store the file pointer/string into tmp_code2 for later emission
+                tmp_code2 = malloc((curr_tok->len + 1) * sizeof(char));
+                strcpy(tmp_code2, curr_tok->text);
+                curr_tok = curr_tok->next;
+            } else {
+                printf("READ ERROR: Invalid file pointer...\n");
+                exit(13);
+            }
+
+            // check for the INTO keyword
+            curr_tok = match(curr_tok, INTO);
+
+            // if it's a variable, we're gonna trash it since it has to be a string
+            if(isvariable(vars, curr_tok->text)) {
+                printf("READ ERROR: Can't read file into an existing variable...\n");
+                exit(14);
+            } else {
+                // create and declare our variable
+                createvar(&vars, curr_tok->text, 4);
+                header_code = append_line(header_code, "char ");
+                header_code = append_line(header_code, curr_tok->text);
+                header_code = append_line(header_code, "[");
+                header_code = append_line(header_code, tmp_code);
+                header_code = append_line(header_code, "];\n");
+
+                // finish off the fgets calls in the emitted code
+                footer_code = append_line(footer_code, curr_tok->text);
+                footer_code = append_line(footer_code, ", ");
+                footer_code = append_line(footer_code, tmp_code);
+                footer_code = append_line(footer_code, ", ");
+                footer_code = append_line(footer_code, tmp_code2);
+                footer_code = append_line(footer_code, ");\n");
+                
+                // make sure the token is an ident
+                curr_tok = match(curr_tok, IDENT);
+            }
+
             break;
         // WRITE string INTO ident nl
         case WRITE:
