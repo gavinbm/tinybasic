@@ -23,6 +23,7 @@
                     FROM     = 36
                     WRITE    = 37
                     INTO     = 38
+                    AS       = 39
                     
 
     These will be assigned to each token as we lex the BASIC file
@@ -35,7 +36,7 @@ enum TokenType {
     GET, LET, IF, THEN, ENDIF, WHILE, REPEAT, ENDWHILE,
     EQ, PLUS, MINUS, MUL, DIV, EQEQ, NOTEQ, LT, LTEQ,
     GT, GTEQ, CHAR, INT, LEFTPAREN, RIGHTPAREN, MOD, OPEN, CLOSE,
-    READ, FROM, WRITE, INTO
+    READ, FROM, WRITE, INTO, AS
 };
 
 struct Token {

@@ -275,9 +275,50 @@ struct Token *statement(struct Token *tokens) {
             break;
         // OPEN string AS ident nl
         case OPEN:
+            curr_tok = curr_tok->next;
+
+            tmp_code = malloc((strlen(curr_tok->text) + 1) * sizeof(char));
+            strcpy(tmp_code, curr_tok->text);
+            //curr_tok = match(curr_tok, STRING);
+            curr_tok = curr_tok->next;
+            
+            curr_tok = match(curr_tok, AS);
+
+            // if it's a variable we're gonna throw an error becaue of potential
+            // typing errors
+            if(isvariable(vars, curr_tok->text)) {
+                printf("Can't read file into existing variable...\n");
+                exit(10);
+            } else {
+                // if it doesn't exist, we're all good
+                createvar(&vars, curr_tok->text, 3);
+                header_code = append_line(header_code, "FILE *");
+                header_code = append_line(header_code, curr_tok->text);
+                header_code = append_line(header_code, ";\n");
+                footer_code = append_line(footer_code, curr_tok->text);
+                footer_code = append_line(footer_code, " = fopen(");
+                footer_code = append_line(footer_code, "\"");
+                footer_code = append_line(footer_code, tmp_code);
+                footer_code = append_line(footer_code, "\", \"w+\");\n");
+            }
+
+            // make sure we have an identifier in place
+            curr_tok = match(curr_tok, IDENT);
             break;
         // CLOSE ident nl
         case CLOSE:
+            curr_tok = curr_tok->next;
+
+            if(isvariable(vars, curr_tok->text) == 3) {
+                footer_code = append_line(footer_code, "fclose(");
+                footer_code = append_line(footer_code, curr_tok->text);
+                footer_code = append_line(footer_code, ");\n");
+            } else {
+                printf("CLOSE ERROR: Invalid file pointer, can't close [%s]...", curr_tok->text);
+                exit(11);
+            }
+
+            curr_tok = match(curr_tok, IDENT);
             break;
         // READ (ident | number) FROM string INTO ident nl
         case READ:

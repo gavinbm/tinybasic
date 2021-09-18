@@ -68,7 +68,7 @@ int isvariable(struct Variable *vars, char *name) {
     
     while(tmp != NULL) {
         if(strcmp(tmp->name, name) == 0)
-            return 1;
+            return tmp->type;
         
         tmp = tmp->next;
     }

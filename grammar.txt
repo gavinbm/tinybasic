@@ -18,7 +18,7 @@ primary    ::= number | char | ident
 char       ::= '(A ... z)'
 nl         ::= '\n'+
 
-OPEN "file.c"                   -> FILE *fp = fopen("file.c", "w+");
-CLOSE "file.c"                  -> fclose("file.c);
+OPEN "file.c" AS fp             -> FILE *fp = fopen("file.c", "w+");
+CLOSE fp                        -> fclose(fp);
 READ 64 FROM "file.c" INTO file -> fgets(file, 64, file.c);
 WRITE "hello" INTO "file.c"     -> fputs("hello", file.c);
