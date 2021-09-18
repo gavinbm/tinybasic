@@ -62,8 +62,10 @@ nl         ::= '\n'+
 The language currently supports:
 - Numeric variables
 - Character variables
+- String variables (WiP, only works via file writing/reading)
 - Basic arithmetic
 - Parentheses in arithmetic expressions
+- File I/O
 - If statements
 - While loops
 - Print text and numbers
