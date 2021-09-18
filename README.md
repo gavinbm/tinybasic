@@ -39,7 +39,7 @@ Keywords or operators, things that are always needed as constants, are written i
 Not every feature that you find in the grammar is implemented yet, as of right now the feature list below the grammar should be considered the final reference for what the language can do. I'm currently working on implementing arrays so any rule or part of any rule that deals with arrays should be ignored.
 ```
 program   ::= {statement}
-statement ::= "PRINT" (expression | string) nl
+statement ::= "PRINT" (expression | string | ident) nl
             | "IF" (comparison | ident) "THEN" nl {statement} "ENDIF" nl
             | "WHILE" comparison "REPEAT" nl {statement} "ENDWHILE" nl
             | "LABEL" ident nl

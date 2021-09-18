@@ -1,5 +1,5 @@
 program   ::= {statement}
-statement ::= "PRINT" (expression | string) nl
+statement ::= "PRINT" (expression | string | ident) nl
             | "IF" (comparison | ident) "THEN" nl {statement} "ENDIF" nl
             | "WHILE" comparison "REPEAT" nl {statement} "ENDWHILE" nl
             | "LABEL" ident nl
