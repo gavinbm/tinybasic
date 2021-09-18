@@ -455,11 +455,11 @@ struct Token *statement(struct Token *tokens) {
                         peek = peek->next;
                         // if we're assigning an ident, we have to make sure it exists as a var already
                         if(peek->type == IDENT && (var_f = isvariable(vars, peek->text))) {
-                            declare(curr_tok, var_f);
+                            declare(curr_tok, peek, var_f);
                         } 
                         // not a var? then it has to be a literal num, char, or str
                         else if(peek->type == NUMBER || peek->type == CHAR || peek->type == STRING) {
-                            declare(curr_tok, peek->type);
+                            declare(curr_tok, peek, peek->type);
                         }
                         // throw an error if it's not a var or supported literal
                         else {
@@ -468,22 +468,22 @@ struct Token *statement(struct Token *tokens) {
                         }
                     }
                 }
-                // emit the var name for initlization/value assignment
-                footer_code = append_line(footer_code, curr_tok->text);
-
                 // save the var name so we can emit the strcpy call if it's a string
                 tmp_code = malloc((curr_tok->len + 1) * sizeof(char));
                 strcpy(tmp_code, curr_tok->text);
-
+                
                 // move to the next token and make sure it's an equal sign
                 curr_tok = match(curr_tok, IDENT);
                 curr_tok = match(curr_tok, EQ);
 
-                // emit the equal's sign
-                footer_code = append_line(footer_code, " = ");
-                
                 // we only check for expressions if it's not a string
-                if(curr_tok->type != STRING) {
+                if(peek->type != STRING) {
+                    // emit the var name for initlization/value assignment
+                    footer_code = append_line(footer_code, curr_tok->text);
+
+                    // emit the equal's sign
+                    footer_code = append_line(footer_code, " = ");
+
                     // match the expression from the grammar rule and add newline and semi-colon chars
                     curr_tok = expression(curr_tok);
 
@@ -496,9 +496,10 @@ struct Token *statement(struct Token *tokens) {
                 else {
                     footer_code = append_line(footer_code, "strcpy(");
                     footer_code = append_line(footer_code, tmp_code);
-                    footer_code = append_line(footer_code, ", ");
+                    footer_code = append_line(footer_code, ", \"");
                     footer_code = append_line(footer_code, curr_tok->text);
-                    footer_code = append_line(footer_code, ")");
+                    footer_code = append_line(footer_code, "\")");
+                    curr_tok = curr_tok->next;
                 }   
 
                 free(tmp_code);

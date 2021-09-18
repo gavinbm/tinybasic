@@ -6,7 +6,7 @@
     integer for boolean-esque functionality in if or switch statements.
 */
 
-void declare(struct Token *curr_tok, int type) {
+void declare(struct Token *curr_tok, struct Token *peek, int type) {
     int tmp_len;
     char *tmp_code;
     
@@ -24,9 +24,9 @@ void declare(struct Token *curr_tok, int type) {
     }
     else if(type == STRING) {
         createvar(&vars, curr_tok->text, STRING);
-        tmp_len = snprintf(NULL, 0, "%d", curr_tok->len + 1);
+        tmp_len = snprintf(NULL, 0, "%d", peek->len + 1);
         tmp_code = malloc((tmp_len + 1) * sizeof(char));
-        snprintf(tmp_code, tmp_len + 1, "%d", curr_tok->len + 1);
+        snprintf(tmp_code, tmp_len + 1, "%d", peek->len + 1);
 
         header_code = append_line(header_code, "char ");
         header_code = append_line(header_code, curr_tok->text);
