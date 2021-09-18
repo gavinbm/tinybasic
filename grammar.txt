@@ -9,7 +9,7 @@ statement ::= "PRINT" (expression | string) nl
             | "OPEN" string AS ident nl
             | "CLOSE" ident nl
             | "READ" (ident | number) FROM ident INTO ident nl
-            | "WRITE" (string) INTO (ident) nl
+            | "WRITE" (string | ident) INTO (ident | string) nl
 comparison ::= expression (("==" | "!=" | ">" | ">=" | "<" | "<=") expression)+
 expression ::= {(} term {( "-" | "+" ) term} {)}
 term       ::= unary {( "/" | "*" ) unary}
@@ -21,4 +21,4 @@ nl         ::= '\n'+
 OPEN "file.c" AS fp             -> FILE *fp = fopen("file.c", "w+");
 CLOSE fp                        -> fclose(fp);
 READ 64 FROM fp INTO file       -> fgets(file, 64, fp);
-WRITE "hello" INTO "file.c"     -> fputs("hello", file.c);
+WRITE "hello" INTO fp           -> fputs("hello", file.c);

@@ -381,14 +381,54 @@ struct Token *statement(struct Token *tokens) {
                 footer_code = append_line(footer_code, ", ");
                 footer_code = append_line(footer_code, tmp_code2);
                 footer_code = append_line(footer_code, ");\n");
-                
+
                 // make sure the token is an ident
                 curr_tok = match(curr_tok, IDENT);
             }
 
+            free(tmp_code);
+            free(tmp_code2);
             break;
-        // WRITE string INTO ident nl
+        // WRITE (string | ident) INTO ident nl
         case WRITE:
+            // move onto what we're writing
+            curr_tok = curr_tok->next;
+
+            footer_code = append_line(footer_code, "fputs(");
+            // make sure we have a string or ident
+            if(isvariable(vars, curr_tok->text) == 4) {
+                footer_code = append_line(footer_code, curr_tok->text);
+            } 
+            else if(curr_tok->type == STRING) {
+                footer_code = append_line(footer_code, "\"");
+                footer_code = append_line(footer_code, curr_tok->text);
+                footer_code = append_line(footer_code, "\"");
+            } else {
+                printf("WRITE ERROR: Invalid output...\n");
+                exit(15);
+            }
+
+            footer_code = append_line(footer_code, ", ");
+
+            // check for the INTO keyword
+            curr_tok = curr_tok->next;
+            curr_tok = match(curr_tok, INTO);
+
+            // make sure we have a valid file pointer
+            if(isvariable(vars, curr_tok->text) == 3) { 
+                footer_code = append_line(footer_code, curr_tok->text);
+            }
+            else if(curr_tok->type == STRING) {
+                footer_code = append_line(footer_code, "\"");
+                footer_code = append_line(footer_code, curr_tok->text);
+                footer_code = append_line(footer_code, "\"");  
+            } else {
+                printf("WRITE ERROR: Invalid file pointer...\n");
+                exit(16);
+            }
+
+            footer_code = append_line(footer_code, ");\n");
+            curr_tok = curr_tok->next;
             break;
         default:
             // {LET} ident = (expression | string) nl
