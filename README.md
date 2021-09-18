@@ -19,6 +19,8 @@ school isn't offering it so I'm putting on my big boy pants and teaching myself 
 - [x] Complete the C emitter
 - [x] Complete testing suite with sample programs
 - [x] Support character variables
+- [x] Support string variables
+- [x] Add file I/O
 - [ ] Write a 3 to 5 function stdlib
 - [ ] Write a REPL
 - [ ] Optimize the compiler via constant folding, hash tables, etc.
@@ -62,7 +64,7 @@ nl         ::= '\n'+
 The language currently supports:
 - Numeric variables
 - Character variables
-- String variables (WiP, only works via file writing/reading)
+- String variables (assignment, printing, reading from file, writing to file only)
 - Basic arithmetic
 - Parentheses in arithmetic expressions
 - File I/O
