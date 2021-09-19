@@ -207,7 +207,7 @@ struct Token *statement(struct Token *tokens) {
                 curr_tok = curr_tok->next;
 
                  // check for the variable (ident that follows the INPUT) in our var list
-                // if it's there, we just fill/overwrite its value, otherwise we need to make it
+                 // if it's there, we just fill/overwrite its value, otherwise we need to make it
                 if(isvariable(vars, curr_tok->text) == 0) {
                     createvar(&vars, curr_tok->text, CHAR);
                     // decalring the new variable in our C code
@@ -233,11 +233,6 @@ struct Token *statement(struct Token *tokens) {
                 footer_code = append_line(footer_code, curr_tok->text);
                 footer_code = append_line(footer_code, " = 0;\n");
                 footer_code = append_line(footer_code, "scanf(\"%*s\");\n}\n");
-                // final_code = append_line(final_code, "if((");
-                // final_code = append_line(final_code, curr_tok->text);
-                // final_code = append_line(final_code, " = getchar()) == EOF) {\n");
-                // final_code = append_line(final_code, curr_tok->text);
-                // final_code = append_line(final_code, " = 0;\n}\n");
             }
             // We're reading an integer
             else if(curr_tok->type == INT) {
@@ -305,14 +300,24 @@ struct Token *statement(struct Token *tokens) {
             } else {
                 // if it doesn't exist, we're all good
                 createvar(&vars, curr_tok->text, 3);
+
+                // declaring the file pointer
                 header_code = append_line(header_code, "FILE *");
                 header_code = append_line(header_code, curr_tok->text);
                 header_code = append_line(header_code, ";\n");
+
+                // opening the file to get a useable file pointer
+                footer_code = append_line(footer_code, "if((");
                 footer_code = append_line(footer_code, curr_tok->text);
                 footer_code = append_line(footer_code, " = fopen(");
                 footer_code = append_line(footer_code, "\"");
                 footer_code = append_line(footer_code, tmp_code);
-                footer_code = append_line(footer_code, "\", \"w+\");\n");
+                footer_code = append_line(footer_code, "\", \"r+\")) == NULL) {\n");
+                footer_code = append_line(footer_code, curr_tok->text);
+                footer_code = append_line(footer_code, " = fopen(");
+                footer_code = append_line(footer_code, "\"");
+                footer_code = append_line(footer_code, tmp_code);
+                footer_code = append_line(footer_code, "\", \"w+\");\n}\n");
             }
 
             free(tmp_code);
@@ -391,6 +396,15 @@ struct Token *statement(struct Token *tokens) {
                 footer_code = append_line(footer_code, ", ");
                 footer_code = append_line(footer_code, tmp_code2);
                 footer_code = append_line(footer_code, ");\n");
+                footer_code = append_line(footer_code, "if(");
+                footer_code = append_line(footer_code, curr_tok->text);
+                footer_code = append_line(footer_code, "[strlen(");
+                footer_code = append_line(footer_code, curr_tok->text);
+                footer_code = append_line(footer_code, ") - 1] == '\\n') {\n");
+                footer_code = append_line(footer_code, curr_tok->text);
+                footer_code = append_line(footer_code, "[strlen(");
+                footer_code = append_line(footer_code, curr_tok->text);
+                footer_code = append_line(footer_code, ") - 1] = '\\0';\n}\n");
 
                 // make sure the token is an ident
                 curr_tok = match(curr_tok, IDENT);
@@ -479,7 +493,7 @@ struct Token *statement(struct Token *tokens) {
                 // we only check for expressions if it's not a string
                 if(peek->type != STRING) {
                     // emit the var name for initlization/value assignment
-                    footer_code = append_line(footer_code, curr_tok->text);
+                    footer_code = append_line(footer_code, tmp_code);
 
                     // emit the equal's sign
                     footer_code = append_line(footer_code, " = ");
