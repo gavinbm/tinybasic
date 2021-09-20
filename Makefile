@@ -1,4 +1,4 @@
-tests = average average.c fib fib.c minmax minmax.c vector vector.c myname myname.c
+tests = average average.c fib fib.c minmax minmax.c vector vector.c myname myname.c hellofile hellofile.c
 
 all: build
 
