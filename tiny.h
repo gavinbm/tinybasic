@@ -32,11 +32,11 @@
 */
 
 enum TokenType {
-    EOFC, NEWLINE, NUMBER, IDENT, STRING, LABEL, GOTO, PRINT,
+    EOFC, NEWLINE, IDENT, STRING, LABEL, GOTO, PRINT,
     GET, LET, IF, THEN, ENDIF, WHILE, REPEAT, ENDWHILE,
     EQ, PLUS, MINUS, MUL, DIV, EQEQ, NOTEQ, LT, LTEQ,
     GT, GTEQ, CHAR, INT, LEFTPAREN, RIGHTPAREN, MOD, OPEN, CLOSE,
-    READ, FROM, WRITE, INTO, AS
+    READ, FROM, WRITE, INTO, AS, STR
 };
 
 struct Token {
@@ -88,7 +88,7 @@ int write_file(char *filename, char *code);
 char *append_line(char *curr_code, char *new_code);
 
 /* ---- util.c ----- */
-void declare(struct Token *curr_tok, struct Token *peek, int type);
+void declare(char *name, struct Token *peek, int type);
 
 int iscomparisonop(struct Token *curr_token);
 int islabel(struct Label *labels, char *name);

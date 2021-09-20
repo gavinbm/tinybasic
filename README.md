@@ -47,7 +47,7 @@ statement ::= "PRINT" (expression | string | ident) nl
             | "LABEL" ident nl
             | "GOTO" ident nl
             | {"LET"} ident "=" (expression | char) nl
-            | "GET" ("INT" | "CHAR") ident nl
+            | "GET" ident "AS" (INT | CHAR | STR) nl
             | "OPEN" string AS ident nl
             | "CLOSE" ident nl
             | "READ" (ident | number) FROM ident INTO ident nl

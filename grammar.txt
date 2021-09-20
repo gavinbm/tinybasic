@@ -5,10 +5,10 @@ statement ::= "PRINT" (expression | string | ident) nl
             | "LABEL" ident nl
             | "GOTO" ident nl
             | {"LET"} ident "=" (expression | char) nl
-            | "GET" ("INT" | "CHAR") ident nl
-            | "OPEN" string AS ident nl
+            | "GET" ident "AS" (INT | CHAR | STR) nl
+            | "OPEN" string "AS" ident nl
             | "CLOSE" ident nl
-            | "READ" (ident | number) FROM ident INTO ident nl
+            | "READ" (ident | number) FROM (ident | string) INTO ident nl
             | "WRITE" (string | ident) INTO (ident | string) nl
 comparison ::= expression (("==" | "!=" | ">" | ">=" | "<" | "<=") expression)+
 expression ::= {(} term {( "-" | "+" ) term} {)}

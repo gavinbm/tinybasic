@@ -1,5 +1,5 @@
 PRINT "How many fibonacci numbers do you want?"
-GET INT nums
+GET nums AS INT
 PRINT ""
 
 LET a = 0

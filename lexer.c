@@ -187,7 +187,7 @@ struct Token *lex(FILE *read) {
                             substr = malloc((i - curr_pos + 1) * sizeof(char));
                             memcpy(substr, &buffer[curr_pos], i - curr_pos + 1);
                             substr[i - curr_pos] = '\0'; // set the null-terminator
-                            createToken(&tokens, substr, NUMBER);
+                            createToken(&tokens, substr, INT);
                             free(substr);
                             i--;
                     } else {
@@ -235,8 +235,7 @@ the token type.
 */
 int iskeyword(char *str) {
     char keywords[39][10] = {
-        "EOF", "NEWLINE", "NUMBER",
-        "IDENT", "STRING", "LABEL",
+        "EOF", "NEWLINE", "IDENT", "STRING", "LABEL",
         "GOTO", "PRINT", "GET",
         "LET", "IF", "THEN",
         "ENDIF", "WHILE", "REPEAT",
@@ -246,7 +245,7 @@ int iskeyword(char *str) {
         "LTEQ", "GT", "GTEQ",
         "CHAR", "INT", "LEFTPAREN", "RIGHTPAREN",
         "MOD", "OPEN", "CLOSE", "READ",
-        "FROM", "WRITE", "INTO", "AS"};
+        "FROM", "WRITE", "INTO", "AS", "STR"};
     
     for(int i = 0; i < 39; ++i) {
         if(strcmp(str, keywords[i]) == 0)

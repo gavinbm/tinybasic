@@ -10,8 +10,8 @@ and kill the program with an exit() call.
 */
 
 char *final_code;               // this string will be our final C code that gets written to the C file
-char *header_code;
-char *footer_code;
+char *header_code;              // the top part of our C code, holds declarations
+char *footer_code;              // part of our C code with actual logic and working code in it
 struct Variable *vars = NULL;   // Our linked list of variables that will be filled as we parse
 struct Label *labels = NULL;    // Out linked list of labels that will be filled as we parse
 
@@ -88,7 +88,7 @@ struct Token *statement(struct Token *tokens) {
 
                 if(var_t) {
                     
-                    if(var_t->type == NUMBER) {
+                    if(var_t->type == INT) {
                         footer_code = append_line(footer_code, "printf(\"%d\\n\", (int)(");
                         curr_tok = expression(curr_tok);
                         footer_code = append_line(footer_code, "));\n"); 
@@ -123,18 +123,20 @@ struct Token *statement(struct Token *tokens) {
                 curr_tok = comparison(curr_tok);
             }
             // we need to find a THEN (type 12) token and a newline after the comparison
-            printf("%s\n", curr_tok->text);
             curr_tok = match(curr_tok, THEN);
             curr_tok = nl(curr_tok);
+            printf("%s", curr_tok->text);
 
             // close the if statement, process the statements within the body of the if
             footer_code = append_line(footer_code, ") {\n");
+            
             while(curr_tok->type != ENDIF)
                 curr_tok = statement(curr_tok);
             
             // look for the ENDIF (type 13) token and close the if statement body
             curr_tok = match(curr_tok, ENDIF);
             footer_code = append_line(footer_code, "\n}\n");
+
             break;
         // WHILE comparison REPEAT {statement} nl ENDWHILE
         case WHILE:
@@ -196,86 +198,91 @@ struct Token *statement(struct Token *tokens) {
             footer_code = append_line(footer_code, ";\n");
             curr_tok = match(curr_tok, IDENT);
             break;
-        // GET (CHAR | INT) ident nl
+        // GET ident AS (INT | CHAR | STR) nl
         case GET:
             //("STATEMENT -- GET\n");
             curr_tok = curr_tok->next;
-            
-            // We're reading a character
-            if(curr_tok->type == CHAR) {
-                // move to the ident
-                curr_tok = curr_tok->next;
+    
+            // store the var name for later
+            tmp_code = malloc((curr_tok->len + 1) * sizeof(char));
+            strcpy(tmp_code, curr_tok->text);
 
-                 // check for the variable (ident that follows the INPUT) in our var list
-                 // if it's there, we just fill/overwrite its value, otherwise we need to make it
-                if(isvariable(vars, curr_tok->text) == 0) {
-                    createvar(&vars, curr_tok->text, CHAR);
-                    // decalring the new variable in our C code
-                    header_code = append_line(header_code, "char ");
-                    header_code = append_line(header_code, curr_tok->text);
-                    header_code = append_line(header_code, ";\n");
-                } else {
-                    // we have to make sure the var type is a char
-                    var_t = getvar(vars, curr_tok->text);
-                    var_t->type = CHAR;
-                }
-                /* 
-                set up the scanf that will fill our variable with the new value
-
-                NOTE: we do a bit extra here to check for errors in the input in case
-                    scanf gives a bad exit code, this helps us avoid errors in the C code
-                    and keep our INPUT functionality pretty simple for the user
-                */
-                footer_code = append_line(footer_code, "if(scanf(\" %c\", (char *)");
-                footer_code = append_line(footer_code, "&");
-                footer_code = append_line(footer_code, curr_tok->text);
-                footer_code = append_line(footer_code, ") == 0) {\n");
-                footer_code = append_line(footer_code, curr_tok->text);
-                footer_code = append_line(footer_code, " = 0;\n");
-                footer_code = append_line(footer_code, "scanf(\"%*s\");\n}\n");
-            }
-            // We're reading an integer
-            else if(curr_tok->type == INT) {
-                // move to the ident
-                curr_tok = curr_tok->next;
-
-                // check for the variable (ident that follows the INPUT) in our var list
-                // if it's there, we just fill/overwrite its value, otherwise we need to make it
-                if(isvariable(vars, curr_tok->text) == 0) {
-                    createvar(&vars, curr_tok->text, NUMBER);
-                    // decalring the new variable in our C code
-                    header_code = append_line(header_code, "int ");
-                    header_code = append_line(header_code, curr_tok->text);
-                    header_code = append_line(header_code, ";\n");
-                } else {
-                    // we have to make sure the var type is an int
-                    var_t = getvar(vars, curr_tok->text);
-                    var_t->type = NUMBER;
-                }
-
-                /* 
-                set up the scanf that will fill our variable with the new value
-
-                NOTE: we do a bit extra here to check for errors in the input in case
-                    scanf gives a bad exit code, this helps us avoid errors in the C code
-                    and keep our INPUT functionality pretty simple for the user
-                */
-                footer_code = append_line(footer_code, "if(scanf(\"%d\", (int *)");
-                footer_code = append_line(footer_code, "&");
-                footer_code = append_line(footer_code, curr_tok->text);
-                footer_code = append_line(footer_code, ") == 0) {\n");
-                footer_code = append_line(footer_code, curr_tok->text);
-                footer_code = append_line(footer_code, " = 0;\n");
-                footer_code = append_line(footer_code, "scanf(\"%*s\");\n}\n");
-            } 
-            // Unrecognized keyword
+            // peek ahead to the type we're getting
+            peek = curr_tok->next;
+            if(peek) 
+                peek = match(peek, AS);
             else {
-                printf("GET ERROR -- Expected \"CHAR\" or \"INT\" -- Got [%s]\n", curr_tok->text);
-                exit(10);
+                printf("Incomplete line...\n");
+                exit(33);
             }
+            
+            // Now that we know it's an ident, we'll check if it's a variable so we can
+            // add it to the symbol table if we have to. We're also checking the type,
+            // as we can't strcpy a string into an integer or a char. Man hiding types
+            // from users is a pain.
+            var_f = isvariable(vars, curr_tok->text);
+            if(var_f == 0) {
+                declare(tmp_code, peek, peek->type);
+            }
+            // make sure we don't assign the wrong type
+            else if(var_f != peek->type) {
+                printf("%d\n", var_f);
+                printf("GET ERROR: Invalid type assignment [%d] to [%d]...\n", peek->type, var_f);
+                exit(31);
+            }
+            /* 
+            set up the scanf that will fill our variable with the new value
 
-            // look for the identifier after the CHAR | INT
-            curr_tok = match(curr_tok, IDENT);
+            NOTE: we do a bit extra here to check for errors in the input in case
+                scanf gives a bad exit code, this helps us avoid errors in the C code
+                and keep our INPUT functionality pretty simple for the user
+            */
+            if(peek->type == INT) {
+                // making the scanf call for an integer
+                footer_code = append_line(footer_code, "if(scanf(\"%d\", ");
+                footer_code = append_line(footer_code, "&");
+                footer_code = append_line(footer_code, tmp_code);
+                footer_code = append_line(footer_code, ") == 0) {\n");
+                footer_code = append_line(footer_code, tmp_code);
+                footer_code = append_line(footer_code, " = 0;\n");
+                footer_code = append_line(footer_code, "scanf(\"%*s\");\n}\n");
+                curr_tok = match(curr_tok, IDENT);
+                curr_tok = match(curr_tok, AS);
+                curr_tok = match(curr_tok, INT);
+            }
+            else if(peek->type == CHAR) {
+                // making the scanf call for a character
+                footer_code = append_line(footer_code, "if(scanf(\"%d\", ");
+                footer_code = append_line(footer_code, "&");
+                footer_code = append_line(footer_code, tmp_code);
+                footer_code = append_line(footer_code, ") == 0) {\n");
+                footer_code = append_line(footer_code, tmp_code);
+                footer_code = append_line(footer_code, " = 0;\n");
+                footer_code = append_line(footer_code, "scanf(\"%*s\");\n}\n");
+                curr_tok = match(curr_tok, IDENT);
+                curr_tok = match(curr_tok, AS);
+                curr_tok = match(curr_tok, CHAR);
+            }
+            else if(peek->type == STR) {
+                // making an fgets call for a string since we shouldn't really use scanf in the
+                // first place but hey, it at least kinda works so we're keeping it
+                footer_code = append_line(footer_code, "fgets(");
+                footer_code = append_line(footer_code, tmp_code);
+                footer_code = append_line(footer_code, ", sizeof(");
+                footer_code = append_line(footer_code, tmp_code);
+                footer_code = append_line(footer_code, "), \"stdin\");\n");
+                footer_code = append_line(footer_code, tmp_code);
+                footer_code = append_line(footer_code, "[strlen(");
+                footer_code = append_line(footer_code, tmp_code);
+                footer_code = append_line(footer_code, ") - 1] = '\\0';\n");
+                curr_tok = match(curr_tok, IDENT);
+                curr_tok = match(curr_tok, AS);
+                curr_tok = match(curr_tok, STR);
+
+            } else {
+                printf("GET ERROR: invalid type for input...\n");
+            }
+            
             break;
         // OPEN string AS ident nl
         case OPEN:
@@ -348,7 +355,7 @@ struct Token *statement(struct Token *tokens) {
             curr_tok = curr_tok->next;
 
             // if it's an integer variable or a number, it's valid
-            if(isvariable(vars, curr_tok->text) == 0 || curr_tok->type == NUMBER) {
+            if(isvariable(vars, curr_tok->text) == 0 || curr_tok->type == INT) {
                 footer_code = append_line(footer_code, "fgets(");
                 // store the number of bytes we need to read from fgets
                 tmp_code = malloc((curr_tok->len + 1) * sizeof(char));
@@ -469,11 +476,11 @@ struct Token *statement(struct Token *tokens) {
                         peek = peek->next;
                         // if we're assigning an ident, we have to make sure it exists as a var already
                         if(peek->type == IDENT && (var_f = isvariable(vars, peek->text))) {
-                            declare(curr_tok, peek, var_f);
+                            declare(curr_tok->text, peek, var_f);
                         } 
                         // not a var? then it has to be a literal num, char, or str
-                        else if(peek->type == NUMBER || peek->type == CHAR || peek->type == STRING) {
-                            declare(curr_tok, peek, peek->type);
+                        else if(peek->type == INT || peek->type == CHAR || peek->type == STRING) {
+                            declare(curr_tok->text, peek, peek->type);
                         }
                         // throw an error if it's not a var or supported literal
                         else {
@@ -482,6 +489,7 @@ struct Token *statement(struct Token *tokens) {
                         }
                     }
                 }
+                
                 // save the var name so we can emit the strcpy call if it's a string
                 tmp_code = malloc((curr_tok->len + 1) * sizeof(char));
                 strcpy(tmp_code, curr_tok->text);
@@ -489,12 +497,12 @@ struct Token *statement(struct Token *tokens) {
                 // move to the next token and make sure it's an equal sign
                 curr_tok = match(curr_tok, IDENT);
                 curr_tok = match(curr_tok, EQ);
-
+                
                 // we only check for expressions if it's not a string
-                if(peek->type != STRING) {
+                if(curr_tok->type != STRING) {
                     // emit the var name for initlization/value assignment
                     footer_code = append_line(footer_code, tmp_code);
-
+                    
                     // emit the equal's sign
                     footer_code = append_line(footer_code, " = ");
 
@@ -613,7 +621,7 @@ struct Token *unary(struct Token *curr_token) {
 struct Token *primary(struct Token *curr_token) {
     //printf("PRIMARY -- [%s]\n", curr_token->text);
     switch(curr_token->type) {
-        case NUMBER:
+        case INT:
             footer_code = append_line(footer_code, curr_token->text);
             curr_token = curr_token->next;
             break;
@@ -675,8 +683,8 @@ struct Token *match(struct Token *token, int type) {
             printf("MATCH ERROR: expected type [%d] but got [%d]...\n", type, token->type);
             exit(2);
         }
+    } else {
+        return NULL;
     }
-
-    return NULL;
 }
 
