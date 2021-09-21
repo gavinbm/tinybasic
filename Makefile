@@ -1,4 +1,4 @@
-tests = average average.c fib fib.c minmax minmax.c vector vector.c myname myname.c hellofile hellofile.c
+tests = shell shell.c readfile readfile.c average average.c fib fib.c minmax minmax.c vector vector.c myname myname.c hellofile hellofile.c
 
 all: build
 
@@ -13,12 +13,16 @@ test: lexer.o parser.o emitter.o tiny.o util.o
 	./tiny tests/vector.bas vector.c
 	./tiny tests/myname.bas myname.c
 	./tiny tests/hellofile.bas hellofile.c
+	./tiny tests/shell.bas shell.c
+	./tiny tests/readfile.bas readfile.c
 	cc -o average average.c
 	cc -o fib fib.c
 	cc -o vector vector.c
 	cc -o minmax minmax.c
 	cc -o myname myname.c
 	cc -o hellofile hellofile.c
+	cc -o shell shell.c
+	cc -o readfile readfile.c
 
 tiny.o: tiny.c util.c tiny.h
 	cc -c util.c tiny.c -ggdb
