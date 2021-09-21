@@ -542,13 +542,37 @@ struct Token *statement(struct Token *tokens) {
 // comparison ::= expression (("==" | "!=" | ">" | ">=" | "<" | "<=") expression)+
 struct Token *comparison(struct Token *curr_token) {
     //printf("COMPARISON\n");
-    
+    int str_f = 0; // marks if we have a string or not
+
+    // since we emit C we have to use strcmp for string comparisons
+    if(curr_token->type == STRING || isvariable(vars, curr_token->text) == STRING) {
+        footer_code = append_line(footer_code, "strcmp(");
+        str_f = 1;
+    }
+ 
     curr_token = expression(curr_token);
 
     if(iscomparisonop(curr_token)) {
-        footer_code = append_line(footer_code, curr_token->text);
-        curr_token = curr_token->next;
-        curr_token = expression(curr_token);
+        // strcmp returns 0 if the strings are equivalent
+        if(str_f && curr_token->type == EQEQ) {
+            footer_code = append_line(footer_code, ", ");
+            curr_token = curr_token->next;
+            curr_token = expression(curr_token);
+            footer_code = append_line(footer_code, ") == 0");
+        } 
+        // strcmp will return not 0 if they're not equal
+        else if(str_f && curr_token->type == NOTEQ) {
+            footer_code = append_line(footer_code, ", ");
+            curr_token = curr_token->next;
+            curr_token = expression(curr_token);
+            footer_code = append_line(footer_code, ") != 0");
+        } 
+        // if we get here, it's not a string so we should be fine
+        else {
+            footer_code = append_line(footer_code, curr_token->text);
+            curr_token = curr_token->next;
+            curr_token = expression(curr_token);
+        }
     } else {
         printf("COMPARISON ERROR...\n");
         exit(1);
@@ -620,24 +644,32 @@ struct Token *unary(struct Token *curr_token) {
 // primary ::= number | ident
 struct Token *primary(struct Token *curr_token) {
     //printf("PRIMARY -- [%s]\n", curr_token->text);
+    int var_f;
+
     switch(curr_token->type) {
         case INT:
             footer_code = append_line(footer_code, curr_token->text);
             curr_token = curr_token->next;
             break;
         case IDENT:
-            if(isvariable(vars, curr_token->text) == 0) {
+            if((var_f = isvariable(vars, curr_token->text))) {
+                footer_code = append_line(footer_code, curr_token->text);
+                curr_token = curr_token->next;
+            } else {
                 printf("PRIMARY ERROR: variable [%s] does not exist...\n", curr_token->text);
                 exit(5);
             }
-            
-            footer_code = append_line(footer_code, curr_token->text);
-            curr_token = curr_token->next;
             break;
         case CHAR:
             footer_code = append_line(footer_code, "\'");
             footer_code = append_line(footer_code, curr_token->text);
             footer_code = append_line(footer_code, "\'");
+            curr_token = curr_token->next;
+            break;
+        case STRING:
+            footer_code = append_line(footer_code, "\"");
+            footer_code = append_line(footer_code, curr_token->text);
+            footer_code = append_line(footer_code, "\"");
             curr_token = curr_token->next;
             break;
         default:

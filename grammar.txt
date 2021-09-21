@@ -14,7 +14,7 @@ comparison ::= expression (("==" | "!=" | ">" | ">=" | "<" | "<=") expression)+
 expression ::= {(} term {( "-" | "+" ) term} {)}
 term       ::= unary {( "/" | "*" ) unary}
 unary      ::= ["+" | "-"] primary
-primary    ::= number | char | ident
+primary    ::= number | char | string | ident
 char       ::= '(A ... z)'
 nl         ::= '\n'+
 
