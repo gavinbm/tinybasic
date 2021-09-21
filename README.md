@@ -41,22 +41,23 @@ Keywords or operators, things that are always needed as constants, are written i
 Not every feature that you find in the grammar is implemented yet, as of right now the feature list below the grammar should be considered the final reference for what the language can do. I'm currently working on implementing arrays so any rule or part of any rule that deals with arrays should be ignored.
 ```
 program   ::= {statement}
-statement ::= "PRINT" (expression | string | ident) nl
+statement ::= "BREAK" nl
+            | "PRINT" (expression | string | ident) nl
             | "IF" (comparison | ident) "THEN" nl {statement} "ENDIF" nl
             | "WHILE" comparison "REPEAT" nl {statement} "ENDWHILE" nl
             | "LABEL" ident nl
             | "GOTO" ident nl
             | {"LET"} ident "=" (expression | char) nl
             | "GET" ident "AS" (INT | CHAR | STR) nl
-            | "OPEN" string AS ident nl
+            | "OPEN" string "AS" ident nl
             | "CLOSE" ident nl
-            | "READ" (ident | number) FROM ident INTO ident nl
+            | "READ" (ident | number) FROM (ident | string) INTO ident nl
             | "WRITE" (string | ident) INTO (ident | string) nl
 comparison ::= expression (("==" | "!=" | ">" | ">=" | "<" | "<=") expression)+
 expression ::= {(} term {( "-" | "+" ) term} {)}
 term       ::= unary {( "/" | "*" ) unary}
 unary      ::= ["+" | "-"] primary
-primary    ::= number | char | ident
+primary    ::= number | char | string | ident
 char       ::= '(A ... z)'
 nl         ::= '\n'+
 ```

@@ -234,7 +234,7 @@ Sets up an array of all our possible token types and checks the given string to 
 the token type.
 */
 int iskeyword(char *str) {
-    char keywords[39][10] = {
+    char keywords[40][10] = {
         "EOF", "NEWLINE", "IDENT", "STRING", "LABEL",
         "GOTO", "PRINT", "GET",
         "LET", "IF", "THEN",
@@ -245,9 +245,9 @@ int iskeyword(char *str) {
         "LTEQ", "GT", "GTEQ",
         "CHAR", "INT", "LEFTPAREN", "RIGHTPAREN",
         "MOD", "OPEN", "CLOSE", "READ",
-        "FROM", "WRITE", "INTO", "AS", "STR"};
+        "FROM", "WRITE", "INTO", "AS", "STR", "BREAK"};
     
-    for(int i = 0; i < 39; ++i) {
+    for(int i = 0; i < 40; ++i) {
         if(strcmp(str, keywords[i]) == 0)
             return i;
     }

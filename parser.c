@@ -64,10 +64,14 @@ struct Token *statement(struct Token *tokens) {
     struct Variable *var_t;
     struct Label *label_tmp;
     char *tmp_code, *tmp_code2, *tmp_code3;
-    int var_f, tmp_len;
+    int var_f, str_f = 0, tmp_len;
 
     switch(curr_tok->type) {
         // PRINT expression | string nl
+        case BREAK:
+            footer_code = append_line(footer_code, "break;\n");
+            curr_tok = curr_tok->next;
+            break;
         case PRINT:
             //printf("STATEMENT -- PRINT\n");
             curr_tok = curr_tok->next;
@@ -125,7 +129,7 @@ struct Token *statement(struct Token *tokens) {
             // we need to find a THEN (type 12) token and a newline after the comparison
             curr_tok = match(curr_tok, THEN);
             curr_tok = nl(curr_tok);
-            printf("%s", curr_tok->text);
+            
 
             // close the if statement, process the statements within the body of the if
             footer_code = append_line(footer_code, ") {\n");
@@ -370,11 +374,13 @@ struct Token *statement(struct Token *tokens) {
             curr_tok = match(curr_tok, FROM);
 
             // check for a valid file pointer or string, throw an error if its not
-            if(isvariable(vars, curr_tok->text) == 3 || curr_tok->type == STRING) {
+            if(isvariable(vars, curr_tok->text) == STRING || curr_tok->type == STRING) {
                 // store the file pointer/string into tmp_code2 for later emission
                 tmp_code2 = malloc((curr_tok->len + 1) * sizeof(char));
                 strcpy(tmp_code2, curr_tok->text);
                 curr_tok = curr_tok->next;
+                if(curr_tok->type == STRING)
+                    str_f = 1;
             } else {
                 printf("READ ERROR: Invalid file pointer...\n");
                 exit(13);
@@ -390,18 +396,27 @@ struct Token *statement(struct Token *tokens) {
             } else {
                 // create and declare our variable
                 createvar(&vars, curr_tok->text, STRING);
-                header_code = append_line(header_code, "char ");
-                header_code = append_line(header_code, curr_tok->text);
-                header_code = append_line(header_code, "[");
-                header_code = append_line(header_code, tmp_code);
-                header_code = append_line(header_code, "];\n");
-
+                
+                // if the user gives a string file pointer, we don't need to bother declaring a variable
+                if(!str_f) {
+                    header_code = append_line(header_code, "char ");
+                    header_code = append_line(header_code, curr_tok->text);
+                    header_code = append_line(header_code, "[");
+                    header_code = append_line(header_code, tmp_code);
+                    header_code = append_line(header_code, "];\n");
+                }
                 // finish off the fgets calls in the emitted code
                 footer_code = append_line(footer_code, curr_tok->text);
                 footer_code = append_line(footer_code, ", ");
                 footer_code = append_line(footer_code, tmp_code);
                 footer_code = append_line(footer_code, ", ");
-                footer_code = append_line(footer_code, tmp_code2);
+                if(str_f) {
+                    footer_code = append_line(footer_code, "\"");
+                    footer_code = append_line(footer_code, tmp_code2);
+                    footer_code = append_line(footer_code, "\"");
+                } else {
+                    footer_code = append_line(footer_code, tmp_code2);
+                }
                 footer_code = append_line(footer_code, ");\n");
                 footer_code = append_line(footer_code, "if(");
                 footer_code = append_line(footer_code, curr_tok->text);
