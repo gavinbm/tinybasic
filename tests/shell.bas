@@ -21,8 +21,6 @@ WHILE a > 0 REPEAT
         GET y AS INT
         PRINT "Difference:"
         PRINT x - y
-<<<<<<< HEAD
-=======
     ENDIF
     IF buffer == "whoareyou" THEN
         PRINT "My name is Tiny :D"
@@ -30,5 +28,4 @@ WHILE a > 0 REPEAT
     IF buffer == "whoami" THEN
         PRINT name
     ENDIF
->>>>>>> 215d5f8fa0b27e802d15b9d0f0b2ad66836a5f57
 ENDWHILE
