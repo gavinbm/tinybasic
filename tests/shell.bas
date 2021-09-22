@@ -1,5 +1,8 @@
 LET a = 1
 
+PRINT "What's your name?"
+GET name AS STRING
+
 WHILE a > 0 REPEAT
     READ 64 FROM "stdin" INTO buffer
     IF buffer == "exit" THEN
@@ -18,4 +21,14 @@ WHILE a > 0 REPEAT
         GET y AS INT
         PRINT "Difference:"
         PRINT x - y
+<<<<<<< HEAD
+=======
+    ENDIF
+    IF buffer == "whoareyou" THEN
+        PRINT "My name is Tiny :D"
+    ENDIF
+    IF buffer == "whoami" THEN
+        PRINT name
+    ENDIF
+>>>>>>> 215d5f8fa0b27e802d15b9d0f0b2ad66836a5f57
 ENDWHILE

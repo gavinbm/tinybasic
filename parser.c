@@ -272,21 +272,21 @@ struct Token *statement(struct Token *tokens) {
                 curr_tok = match(curr_tok, AS);
                 curr_tok = match(curr_tok, CHAR);
             }
-            else if(peek->type == STR) {
+            else if(peek->type == STRING) {
                 // making an fgets call for a string since we shouldn't really use scanf in the
                 // first place but hey, it at least kinda works so we're keeping it
                 footer_code = append_line(footer_code, "fgets(");
                 footer_code = append_line(footer_code, tmp_code);
                 footer_code = append_line(footer_code, ", sizeof(");
                 footer_code = append_line(footer_code, tmp_code);
-                footer_code = append_line(footer_code, "), \"stdin\");\n");
+                footer_code = append_line(footer_code, "), stdin);\n");
                 footer_code = append_line(footer_code, tmp_code);
                 footer_code = append_line(footer_code, "[strlen(");
                 footer_code = append_line(footer_code, tmp_code);
                 footer_code = append_line(footer_code, ") - 1] = '\\0';\n");
                 curr_tok = match(curr_tok, IDENT);
                 curr_tok = match(curr_tok, AS);
-                curr_tok = match(curr_tok, STR);
+                curr_tok = match(curr_tok, STRING);
 
             } else {
                 printf("GET ERROR: invalid type for input...\n");
@@ -504,6 +504,7 @@ struct Token *statement(struct Token *tokens) {
                         }
                         // throw an error if it's not a var or supported literal
                         else {
+                            printf("%s\n%s", header_code, footer_code);
                             printf("ASSIGNMENT ERROR: Invalid data type %d...\n", curr_tok->type);
                             exit(20);
                         }
@@ -701,21 +702,6 @@ struct Token *primary(struct Token *curr_token) {
     return curr_token;
 }
 
-// char ::= '(A ... z)'
-struct Token *character(struct Token *curr_token) {
-    if(curr_token->type == CHAR) {
-        footer_code = append_line(footer_code, "\'");
-        footer_code = append_line(footer_code, curr_token->text);
-        footer_code = append_line(footer_code, "\'");
-    } else {
-        printf("CHAR ERROR -- Expected type 28 but got %d...", curr_token->type);
-        exit(9);
-    }
-
-    curr_token = curr_token->next;
-    return curr_token;
-}
-
 // nl ::= '\n'+
 struct Token *nl(struct Token *curr_token) {
     //printf("NEWLINE\n");
@@ -732,7 +718,7 @@ struct Token *match(struct Token *token, int type) {
         if(token->type == type) {
             return token->next;
         } else {
-            printf("MATCH ERROR: expected type [%d] but got [%d]...\n", type, token->type);
+            printf("MATCH ERROR: expected type [%d] but got [%d -- [%s]]...\n", type, token->type, token->text);
             exit(2);
         }
     } else {
