@@ -12,4 +12,10 @@ WHILE a > 0 REPEAT
         PRINT "Sum:"
         PRINT y + x
     ENDIF
+    IF buffer == "sub" THEN
+        PRINT "Enter two numbers"
+        GET x AS INT
+        GET y AS INT
+        PRINT "Difference:"
+        PRINT x - y
 ENDWHILE

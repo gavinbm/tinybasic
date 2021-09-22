@@ -21,7 +21,7 @@ int write_file(char *filename, char *code) {
 }
 
 /*
-Appeend the given string (new_code) to the end of the other given string (curr_code). Will perform all
+Append the given string (new_code) to the end of the other given string (curr_code). Will perform all
 malloc's needed to do so and will work provided that curr_code has been malloc'd prior to calling this function.
 returns a pointer to a new string.
 */
@@ -35,5 +35,23 @@ char *append_line(char *curr_code, char *new_code) {
     full_code[(curr_len + added_len)] = '\0';
     
     free(curr_code);
+    return full_code;
+}
+
+/*
+Prepend the given string (new) to the current string (curr). Assumes that curr has been malloc'd,
+new can be a string const or a previously malloc'd string although new will not be free'd by this
+function. Returns a new pointer to a new string with the final combined string.
+*/
+char *prepend_line(char *curr, char *new) {
+    int curr_len = strlen(curr);
+    int new_len = strlen(new);
+
+    char *full_code = malloc((curr_len + new_len + 1) * sizeof(char));
+    memcpy(full_code, new, new_len);
+    memcpy(full_code + new_len, curr, curr_len);
+    full_code[(curr_len + new_len)] = '\0';
+    
+    free(curr);
     return full_code;
 }

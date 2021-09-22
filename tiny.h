@@ -86,6 +86,7 @@ struct Token *match(struct Token *token, int type);
 /* ---- emitter.c ---- */
 int write_file(char *filename, char *code);
 char *append_line(char *curr_code, char *new_code);
+char *prepend_line(char *curr, char *new);
 
 /* ---- util.c ----- */
 void declare(char *name, struct Token *peek, int type);

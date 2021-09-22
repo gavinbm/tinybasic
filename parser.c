@@ -51,13 +51,18 @@ void program(struct Token *tokens) {
 }
 
 /*
-statement ::= "PRINT" (expression | string) nl
-            | "IF" comparison "THEN" nl {statement} "ENDIF" nl
+statement ::= "BREAK" nl
+            | "PRINT" (expression | string | ident) nl
+            | "IF" (comparison | ident) "THEN" nl {statement} "ENDIF" nl
             | "WHILE" comparison "REPEAT" nl {statement} "ENDWHILE" nl
             | "LABEL" ident nl
             | "GOTO" ident nl
-            | "LET" ident "=" expression nl
-            | "INPUT" ident nl
+            | {"LET"} ident "=" (expression | char) nl
+            | "GET" ident "AS" (INT | CHAR | STR) nl
+            | "OPEN" string "AS" ident nl
+            | "CLOSE" ident nl
+            | "READ" (ident | number) FROM (ident | string) INTO ident nl
+            | "WRITE" (string | ident) INTO (ident | string) nl
 */
 struct Token *statement(struct Token *tokens) {
     struct Token *curr_tok = tokens, *peek;
