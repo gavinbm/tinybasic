@@ -48,29 +48,11 @@ void declare(char *name, struct Token *peek, int type) {
     BASIC and that's no bueno.
 */
 int iscomparisonop(struct Token *curr_token) {
-    switch(curr_token->type) {
-        case EQEQ:
-            return 22;
-            break;
-        case NOTEQ:
-            return 23;
-            break;
-        case LT:
-            return 24;
-            break;
-        case LTEQ:
-            return 25;
-            break;
-        case GT:
-            return 26;
-            break;
-        case GTEQ:
-            return 27;
-            break;
-        default:
-            return 0;
-            break;
-    }
+    
+    if(curr_token->type >= EQEQ && curr_token->type <= GTEQ)
+        return curr_token->type;
+    else
+        return 0;
 }
 
 /*
