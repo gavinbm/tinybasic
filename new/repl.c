@@ -3,6 +3,8 @@
 #include <ctype.h>
 #include <string.h>
 
+int vars[26] = {0};
+
 enum { SPACE = -3, TERMINAL, EOI,
       PRINT = 0, IF, THEN, WHILE, DO, LABEL, GOTO, LET, INPUT, END,
       PROC, RTRN, CALL, EQL, NOT, LES, GRT, PLS, MIN, MUL, DIV, NLN, 
@@ -136,13 +138,13 @@ void next() {
 }
 
 /* =========== Parser ========== */
-enum {PROG, SPR, SIF, SWL, SCL, SLB, SGO, SLT, SIN,
-      COMP, EXPR, TERM, UNRY, PRIM, NUMR, VARB, NWLN};
+enum {PROG, SPR, SIF, SWL, SPC, SCL, SLB, SGO, SLT, SIN,
+      COMP, EXPR, TERM, UNRY, NUMR, VARB, NWLN};
 
 typedef struct node {
     int type;
     int value;
-    node *o1, *o2, *o3, *o4;
+    struct node *o1, *o2, *o3, *o4;
 } node;
 
 node *new(int t) {
@@ -151,7 +153,7 @@ node *new(int t) {
     return res;
 }
 
-node *match(int check) { // utility to check token types
+void match(int check) { // utility to check token types
 
     if(type != check) {
         printf("Match Error: got [%d] expected [%d]\n", type, check);
@@ -162,57 +164,88 @@ node *match(int check) { // utility to check token types
 }
 
 node *nl() { // nl ::= '\n'+
-    puts("NEWLINE");
-
+    //puts("NEWLINE");
+    node *res = new(NWLN);
     match(NLN);
     while(type == NLN)
         next();
+    
+    return res;
 }
 
 node *primary() { // primary ::= number | ident
-    puts("PRIMARY");
+    //puts("PRIMARY");
+    node *res;
 
-    if(type == IDENT || type == NUM)
+    if(type == IDENT || type == NUM) {
+        if(type == IDENT) {
+            res = new(VARB);
+            res->value = vars[*tok - 97];
+        } else {
+            res = new(NUMR);
+            res->value = atoi(tok);
+        }
+
         next();
-    else
+    } else
         exit(20);
+
+    return res;
 }
 
 node *unary() { // unary ::= ["+" | "-"] primary
-    puts("UNARY");
-    if(type == PLS || type == MIN)
-        next();
+    //puts("UNARY");
+    node *res = new(UNRY);
     
-    primary();
+    if(type == PLS || type == MIN) {
+        if(type == PLS)
+            res->o1 = new(PLS);
+        else
+            res->o1 = new(MIN); 
+        
+        next();
+    }
+    
+    res->o2 = primary();
+    return res;
 }
 
 node *term() { // term ::= unary {( "/" | "*" ) unary}
-    puts("TERM");
-    unary();
+    //puts("TERM");
+    node *res = new(TERM);
+    
+    res->o1 = unary();
 
     while(type == DIV || type == MUL) {
         next();
-        unary();
+        res->o2 = unary();
     }
+
+    return res;
 }
 
 node *expr() { // expr ::= term {( "-" | "+" ) term}
-    puts("EXPR");
-    term();
+    //puts("EXPR");
+    node *res = new(EXPR);
+    
+    res->o1 = term();
 
     while(type == PLS || type == MIN) {
         next();
-        term();
+        res->o2 = term();
     }
+
+    return res;
 }
 
 node *comp() { // comp ::= expr (("=" | "!" | ">" | "<") expr)+
-    puts("COMP");    
-    expr();
+    //puts("COMP");    
+    node *res = new(COMP);
+    res->o1 = expr();
 
     if(type == EQL || type == NOT || type == LES || type == GRT) {
            next();
-           expr();
+           res->o2 = expr();
     } else {
            printf("Comp Error: Expected op got [%s] -- [%d]\n", tok, type);
            exit(11);
@@ -220,70 +253,97 @@ node *comp() { // comp ::= expr (("=" | "!" | ">" | "<") expr)+
     
     while(type == EQL || type == NOT || type == LES || type == GRT) {
            next();
-           expr();
+           res->o3 = expr();
        }
+
+       return res;
 }
 
 node *stmnt() {
+    node *res;
 
     switch(type) {
         case PRINT: // "PRINT" (expression | string) nl
-            puts("STATEMENT -- PRINT");
+            //puts("STATEMENT -- PRINT");
+            res = new(SPR);
             next();
-
+            
             if(type == STR) {
                 next();
             } else { 
-                expr();
+                res->o1 = expr();
             }
 
             break;
         case IF: // "IF" comparison "THEN" nl {statement} "END" nl
-            puts("STATEMENT -- IF");
-            next(); comp(); match(THEN); nl();
+            //puts("STATEMENT -- IF");
+            res = new(SIF);
+            next(); 
+            res->o1 = comp(); 
+            match(THEN); 
+            res->o2 = nl();
 
             while(type != END)
-                stmnt();
+                res->o3 = stmnt();
 
             match(END);
             break;
         case WHILE: // "WHILE" comparison "DO" nl {statement} "END" nl
-            puts("STATEMENT -- WHILE");
-            next(); comp(); match(DO); nl();
+            //puts("STATEMENT -- WHILE");
+            res = new(SWL);
+
+            next(); 
+            res->o1 = comp(); 
+            match(DO); 
+            res->o2 = nl();
 
             while(type != END)
-                stmnt();
+                res->o3 = stmnt();
             
             match(END);
             break;
         case PROC: // "PROC" ident nl {statement} "RETURN" nl
-            puts("STATEMENT -- PROC");
-            next(); match(IDENT); nl();
+            //puts("STATEMENT -- PROC");
+            res = new(SPC);
+            next(); 
+            match(IDENT); 
+            res->o1 = nl();
 
             while(type != RTRN)
-                stmnt();
+                res->o2 = stmnt();
 
             match(RTRN);
             break;
         case CALL: // "CALL" ident nl
-            puts("STATEMENT -- CALL");
+            //puts("STATEMENT -- CALL");
+            res = new(SCL);
 
             next(); match(IDENT); 
             break;
         case LABEL: // "LABEL" ident nl
-            puts("STATEMENT -- LABEL");
+            //puts("STATEMENT -- LABEL");
+            res = new(SLB);
+
             next(); match(IDENT);
             break;
         case GOTO: // "GOTO" ident nl
-            puts("STATEMENT -- GOTO");
+            //puts("STATEMENT -- GOTO");
+            res = new(SGO);
+
             next(); match(IDENT);
             break;
         case LET: // "LET" ident "=" expression nl
-            puts("STATEMENT -- LET");
-            next(); match(IDENT); match(EQL); expr();
+            //puts("STATEMENT -- LET");
+            res = new(SLT);
+
+            next(); match(IDENT); match(EQL); 
+            
+            res->o1 = expr();
             break;
         case INPUT: // "INPUT" ident nl
-            puts("STATEMENT -- INPUT");
+            //puts("STATEMENT -- INPUT");
+            res = new(SIN);
+
             next(); match(IDENT);
             break;
         default:
@@ -291,26 +351,60 @@ node *stmnt() {
             break;
     }
 
-    nl();
+    res->o4 = nl();
+    return res;
 }
 
 node *prog() {
 
     node *root = new(PROG);
-    root->o1 = stmnt();
 
     while(type == NLN || type == SPACE)
         next();
 
-    while(type != EOI && type != TERMINAL)
-        stmnt();
+     //while(type != EOI && type != TERMINAL)
+    root->o1 = stmnt();
     
     return root;
 }
 
+/* ========= Code Gen ========== */
+enum {ADD, SUB, MOV, STORE, LOAD, CMP, SVC, BR};
+
+void gen(node *tree) {
+    switch(tree->type) {
+        case PROG: gen(tree->o1); break;
+
+        case EXPR: gen(tree->o1); gen(tree->o2); break;
+        case TERM: gen(tree->o1); gen(tree->o2); break;
+        case UNRY: gen(tree->o1); break;
+        case VARB: gen(tree->o1); break;
+        case NUMR: gen(tree->o1); break;
+        case NWLN: gen(tree->o1); break;
+
+        case COMP: break;
+
+        case SPR: break;
+        case SIF: break;
+        case SWL: break;
+        case SPC: break;
+        case SCL: break;
+        case SLB: break;
+        case SGO: break;
+        case SLT: break;
+        case SIN: break;
+        default:
+            break;
+    }
+}
+
 /* ===========  Main  ========== */
 int main(int argc, char **argv) {
-    char *input = readfile(argv[1]);
+    char *input;
+    if(argc > 1)
+        input = readfile(argv[1]);
+    else
+        return 0;
 
     if(input) {
         pos = input;
