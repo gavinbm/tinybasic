@@ -262,6 +262,7 @@ node *comp() { // comp ::= expr (("=" | "!" | ">" | "<") expr)+
 }
 
 node *stmnt() {
+    int i = 0;
     node *res, *tmp;
 
     switch(type) {
@@ -286,8 +287,11 @@ node *stmnt() {
             match(THEN); 
             res->o2 = nl();
 
-            while(type != END)
-                res->o3 = stmnt();
+            res->o3 = malloc(100 * sizeof(node));
+            while(type != END) {
+                res->o3[i] = *stmnt(); i++;
+            }
+            res->o3[i] = *new(END);
 
             match(END);
             break;
@@ -300,9 +304,12 @@ node *stmnt() {
             match(DO); 
             res->o2 = nl();
 
-            //while(type != END)
-                res->o3 = stmnt();
-            
+            res->o3 = malloc(100 * sizeof(node));
+            while(type != END) {
+                res->o3[i] = *stmnt(); i++;
+            }
+            res->o3[i] = *new(END);
+
             match(END);
             break;
         case PROC: // "PROC" ident nl {statement} "RETURN" nl
@@ -310,10 +317,13 @@ node *stmnt() {
             res = new(SPC);
             next(); 
             match(IDENT); 
-            res->o1 = nl();
+            res->o2 = nl();
 
-            while(type != END)
-                res->o2 = stmnt();
+            res->o3 = malloc(100 * sizeof(node));
+            while(type != END) {
+                res->o3[i] = *stmnt(); i++;
+            }
+            res->o3[i] = *new(RTRN);
 
             match(RTRN);
             break;
@@ -354,21 +364,25 @@ node *stmnt() {
             break;
     }
 
-    //res->o4 = nl();
+    res->o4 = nl();
     return res;
 }
 
 node *prog() {
 
-    node *root = new(PROG);
+    int i = 0;
+    node *stmnts = malloc(100 * sizeof(node));
 
-    while(type == NLN || type == SPACE)
+    while(type == NLN || type == SPACE) {
         next();
+    }
 
-    //while(type != EOI && type != TERMINAL)
-        root->o1 = stmnt();
+    while(type != EOI && type != TERMINAL) {
+        stmnts[i] = *stmnt(); i++;
+    }
+    stmnts[i] = *new(EOI);
     
-    return root;
+    return stmnts;
 }
 
 /* ========= Code Gen ========== */
@@ -376,10 +390,57 @@ enum {ADD, SUB, MOV, STORE, LOAD, CMP, SVC, BR};
 
 void walk(node *tree) {
     if(tree != NULL) {
-        //printf("[%d]\n", tree->type);
         switch(tree->type) {
             case PROG: puts("PROG"); walk(tree->o1); break;
-            case NWLN: puts("NWLN"); break;
+            case SPR:
+                puts("SPR");
+                if(tree->o1->type == EXPR)
+                    walk(tree->o1);
+                break;
+            case SIF:
+                puts("SIF");
+                walk(tree->o1);
+                walk(tree->o2);
+                for(int i = 0; tree->o3[i].type != END; i++)
+                    walk(&(tree->o3[i]));
+                break;
+            case SWL:
+                puts("SWL");
+                walk(tree->o1);
+                walk(tree->o2);
+                for(int i = 0; tree->o3[i].type != END; i++)
+                    walk(&(tree->o3[i]));
+                break;
+            case SPC:
+                puts("SPC");
+                walk(tree->o1);
+                walk(tree->o2);
+                for(int i = 0; tree->o3[i].type != END; i++)
+                    walk(&(tree->o3[i]));
+                break;
+            case SCL:
+                puts("SCL"); 
+                break;
+            case SLB:
+                puts("SLB"); 
+                break;
+            case SGO:
+                puts("SGO");
+                break;
+            case SLT: 
+                puts("SLT");
+                walk(tree->o1);
+                break;
+            case SIN: 
+                puts("SIN"); 
+                break;
+            case COMP:
+                puts("COMP");
+                walk(tree->o1);
+                walk(tree->o2);
+                if(tree->o3)
+                    walk(tree->o3);
+                break;
             case EXPR: 
                 puts("EXPR");
                 walk(tree->o1);
@@ -404,53 +465,14 @@ void walk(node *tree) {
             case NUMR: 
                 puts("NUMR");
                 break;
-            case COMP:
-                puts("COMP");
-                walk(tree->o1);
-                walk(tree->o2);
-                if(tree->o3)
-                    walk(tree->o3);
-                break;
-            case SPR:
-                puts("SPR");
-                if(tree->o1->type == EXPR)
-                    walk(tree->o1);
-                break;
-            case SIF:
-                puts("SIF");
-                walk(tree->o1);
-                walk(tree->o3);
-                break;
-            case SWL:
-                puts("SWL");
-                walk(tree->o1);
-                walk(tree->o3);
-                break;
-            case SPC:
-                puts("SPC");
-                walk(tree->o1);
-                walk(tree->o2);
-                break;
-            case SCL:
-                puts("SCL"); 
-                break;
-            case SLB:
-                puts("SLB"); 
-                break;
-            case SGO:
-                puts("SGO");
-                 break;
-            case SLT: 
-                puts("SLT");
-                walk(tree->o1);
-                break;
-            case SIN: 
-                puts("SIN"); 
+            case NWLN: 
+                puts("NWLN\n"); 
                 break;
             default:
                 printf("defaulted on [%d]\n", tree->type);
                 break;
         }
+        walk(tree->o4);
     }
 }
 
@@ -466,7 +488,9 @@ int main(int argc, char **argv) {
         pos = input;
 
         next();
-        walk(prog());
+        node *stmnts = prog();
+        for(int i = 0; stmnts[i].type != EOI; i++)
+            walk(&stmnts[i]);
 
         free(input);
     }
