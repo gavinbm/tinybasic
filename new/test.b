@@ -1,6 +1,5 @@
 PRINT "How many fibonacci numbers do you want?"
 INPUT v
-PRINT ""
 
 LET a = 0
 LET b = 1

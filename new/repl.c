@@ -386,12 +386,16 @@ node *prog() {
 }
 
 /* ========= Code Gen ========== */
-enum {ADD, SUB, MOV, STORE, LOAD, CMP, SVC, BR};
+enum {IFETCH, ISTORE, IPUSH, IPOP, IADD, ISUB, IMUL, IDIV, 
+      ILT, IGT, INE, IEQ};
+
+char obj[100000], *here;
+
+void intergen(char c) {*here++ = c;}
 
 void walk(node *tree) {
     if(tree != NULL) {
         switch(tree->type) {
-            case PROG: puts("PROG"); walk(tree->o1); break;
             case SPR:
                 puts("SPR");
                 if(tree->o1->type == EXPR)
