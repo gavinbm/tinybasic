@@ -1,4 +1,4 @@
-A C implementation of the Tiny BASIC compiler found in [this article](http://web.eecs.utk.edu/~azh/blog/teenytinycompiler1.html) and [this github repo](https://github.com/AZHenley/teenytinycompiler) by Dr. Austin Henley. This is a rewrite of the compiler I wrote previously. The old one can be found in the old directory in this repo, it's a hot mess and is way more inefficient than it has any right being. This version should be better :)
+A C implementation of the Tiny BASIC compiler found in [this article](http://web.eecs.utk.edu/~azh/blog/teenytinycompiler1.html) and [this github repo](https://github.com/AZHenley/teenytinycompiler) by Dr. Austin Henley. This is a rewrite of the compiler I wrote previously. The old one (with an in-depth README write-up) can be found in the old directory in this repo, it's a hot mess and is way more inefficient than it has any right being. This version should be better :)
 
 The goals are just learning as much as I can, so in the next sections about the techincal details I'm just going to go over what's new to me here.Hopefully I learn enough to make a useable language of my own :D
 
