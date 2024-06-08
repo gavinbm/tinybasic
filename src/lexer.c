@@ -1,4 +1,4 @@
-#include "tiny.h"
+#include "../inc/tiny.h"
 
 /*          ---- Token Type Map ----
     Specials        Keywords        Operators

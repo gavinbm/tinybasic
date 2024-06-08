@@ -1,4 +1,4 @@
-#include "tiny.h"
+#include "../inc/tiny.h"
 
 /*
     Utility functions that don't really fit anywhere else particularly well.

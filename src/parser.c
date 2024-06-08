@@ -1,4 +1,4 @@
-#include "tiny.h"
+#include "../inc/tiny.h"
 
 /*
 Welcome to the parser, this will walk through our tokens and make sure that each

@@ -1,12 +1,13 @@
 tests = shell shell.c readfile readfile.c average average.c fib fib.c minmax minmax.c vector vector.c myname myname.c hellofile hellofile.c
+obj_files = obj/tiny.o obj/lexer.o obj/parser.o obj/emitter.o obj/util.o
 
 all: build
 
-build: lexer.o parser.o emitter.o tiny.o util.o
-	cc -o tiny tiny.o lexer.o parser.o emitter.o util.o -ggdb
+build: objects
+	cc -o tiny $(obj_files) -ggdb
 
-test: lexer.o parser.o emitter.o tiny.o util.o
-	cc -o tiny tiny.o lexer.o parser.o emitter.o util.o -ggdb
+tests: objects
+	cc -o tiny $(obj_files) -ggdb
 	./tiny tests/average.bas average.c
 	./tiny tests/fibonacci.bas fib.c
 	./tiny tests/minmax.bas minmax.c
@@ -24,27 +25,31 @@ test: lexer.o parser.o emitter.o tiny.o util.o
 	cc -o shell shell.c
 	cc -o readfile readfile.c
 
-tiny.o: tiny.c util.c tiny.h
-	cc -c util.c tiny.c -ggdb
+objects: lexer.o parser.o emitter.o tiny.o util.o
+	mkdir obj
+	mv *.o obj
 
-emitter.o: emitter.c tiny.h
-	cc -c emitter.c -ggdb
+tiny.o: src/tiny.c src/util.c inc/tiny.h
+	cc -c src/util.c src/tiny.c -ggdb
 
-parser.o: parser.c util.c tiny.h
-	cc -c util.c parser.c -ggdb
+emitter.o: src/emitter.c inc/tiny.h
+	cc -c src/emitter.c -ggdb
 
-lexer.o: lexer.c util.c tiny.h
-	cc -c util.c lexer.c -ggdb
+parser.o: src/parser.c src/util.c inc/tiny.h
+	cc -c src/util.c src/parser.c -ggdb
 
-freeprint.o: util.c tiny.h
-	cc -c util.c -ggdb
+lexer.o: src/lexer.c src/util.c inc/tiny.h
+	cc -c src/util.c src/lexer.c -ggdb
+
+freeprint.o: src/util.c inc/tiny.h
+	cc -c src/util.c -ggdb
 
 clean-build:
-	rm *.o tiny
+	rm -rf obj tiny
 
 clean-tests:
-	rm $(tests)
+	rm /$(tests)
 
 clean:
-	rm *.o tiny $(tests)
+	rm -rf obj tiny $(tests)
 	

@@ -1,4 +1,4 @@
-#include "tiny.h"
+#include "../inc/tiny.h"
 
 /*
 The emitter! The final piece! here we will define functions that will be used to spit out
