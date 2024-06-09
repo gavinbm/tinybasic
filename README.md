@@ -1,5 +1,7 @@
-# Teeny Tiny Basic (OLD AND DEPRECATED)
-A C implementation of the Tiny BASIC compiler found in [this article](http://web.eecs.utk.edu/~azh/blog/teenytinycompiler1.html) and [this github repo](https://github.com/AZHenley/teenytinycompiler) by Dr. Austin Henley. I did pretty well in Automata last semester and was excited to take Compiler Design this Fall, but my
+# Teeny Tiny Basic - My version
+EDIT 6/8/2024 - I decided to restructure this project to show off my original work. This was a tremendous learning experience for me, so I've made one last big commit to organize it so I can be proud of younger me doing his best. Everything below was written by me in 2021, when I was an intern at Microsoft and an undergrad student who was obsessed with the theoretical parts of computer science and discreet math, enjoy!
+
+A C implementation of the Tiny BASIC compiler found in [this article](https://austinhenley.com/blog/teenytinycompiler1.html) and [this github repo](https://github.com/AZHenley/teenytinycompiler) by Dr. Austin Henley. I did pretty well in Automata last semester and was excited to take Compiler Design this Fall, but my
 school isn't offering it so I'm putting on my big boy pants and teaching myself how to write a compiler (with no memory leaks to boot!).
 
 # Building and Using
